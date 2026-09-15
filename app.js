@@ -389,7 +389,7 @@ function topbarParent(parentId, childId, tab) {
   const badge = unreadCount(`parent_${parentId.toLowerCase()}`);
   return `<div class="topbar"><div class="topbar-inner">
     <button class="who" data-action="nav" data-href="#/"><span class="avatar" style="background:var(--ink); color:#fff;">👤</span>
-      <span><div class="name">Parent view</div><div class="sub">Managing the family</div></span>
+      <span><div class="name">Parent view</div></span>
     </button>
     <div class="parent-toggle" role="group" aria-label="Switch parent">
       <button class="${parentId === 'A' ? 'active' : ''}" data-action="set-parent" data-p="A" data-tab="${tab}" data-child="${childId || ''}">Parent A</button>

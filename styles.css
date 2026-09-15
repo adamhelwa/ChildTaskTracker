@@ -60,7 +60,7 @@ p{margin:0;}
 }
 .avatar.sm{width:28px; height:28px; font-size:14px; box-shadow:0 2px 0 var(--sun-deep);}
 .topbar .name{font-family:var(--font-display); font-weight:700; font-size:16.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.topbar .sub{font-size:12px; color:var(--ink-soft); font-weight:700;}
+.topbar .sub{font-size:12px; color:var(--ink-soft); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .icon-btn{
   width:38px; height:38px; border-radius:50%; border:2px solid var(--line); background:#fff;
   display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; flex:none;
@@ -80,6 +80,11 @@ p{margin:0;}
   padding:6px 12px; border-radius:100px; cursor:pointer; color:var(--ink-soft);
 }
 .parent-toggle button.active{background:var(--sky); color:#fff;}
+@media (max-width:400px){
+  .topbar-inner{gap:6px;}
+  .parent-toggle button{padding:6px 9px; font-size:12px;}
+  .topbar .who .name{font-size:15px;}
+}
 
 /* ---------- Bottom nav ---------- */
 .bottomnav{
