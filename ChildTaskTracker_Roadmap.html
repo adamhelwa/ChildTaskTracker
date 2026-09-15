@@ -1,0 +1,238 @@
+<title>ChildTaskTracker Roadmap</title>
+<style>
+  :root{
+    --bg:#FBFAF5;
+    --surface:#FFFFFF;
+    --surface-2:#F1EFE6;
+    --ink:#1F2A24;
+    --ink-soft:#54604F;
+    --line:#DEDBCB;
+    --accent:#2E7D5B;
+    --accent-soft:#E4F1E9;
+    --accent-ink:#1D5A40;
+    --amber:#B4761F;
+    --amber-soft:#F6EBD6;
+    --blue:#3B6FA0;
+    --blue-soft:#E4EDF5;
+    --font-display:"Baloo 2",ui-rounded,"Segoe UI",sans-serif;
+    --font-body:"IBM Plex Sans",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F2118; --surface:#15301F; --surface-2:#1B3A26;
+      --ink:#E9F2EA; --ink-soft:#A9BFAE; --line:#2C4D37;
+      --accent:#6FD9A0; --accent-soft:#1E4531; --accent-ink:#8FE8B4;
+      --amber:#E3AA56; --amber-soft:#3A2E17;
+      --blue:#7FB1E0; --blue-soft:#1C3550;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F2118; --surface:#15301F; --surface-2:#1B3A26;
+    --ink:#E9F2EA; --ink-soft:#A9BFAE; --line:#2C4D37;
+    --accent:#6FD9A0; --accent-soft:#1E4531; --accent-ink:#8FE8B4;
+    --amber:#E3AA56; --amber-soft:#3A2E17;
+    --blue:#7FB1E0; --blue-soft:#1C3550;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-body); margin:0; padding-inline:20px; line-height:1.6;}
+  .wrap{max-width:920px; margin:0 auto; padding-block:32px 80px;}
+  header.hero{border-bottom:2px solid var(--line); padding-bottom:20px; margin-bottom:32px;}
+  header.hero .kicker{font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; font-size:12px; color:var(--accent-ink); margin:0 0 10px;}
+  header.hero h1{font-family:var(--font-display); font-weight:700; font-size:clamp(28px,4vw,40px); margin:0 0 8px; text-wrap:balance;}
+  header.hero .sub{color:var(--ink-soft); max-width:62ch; margin:0 0 14px;}
+  header.hero .meta{font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); display:flex; gap:18px; flex-wrap:wrap;}
+
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:36px;}
+  .legend span{display:flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);}
+  .legend .dot{width:9px; height:9px; border-radius:50%;}
+
+  .timeline{position:relative; margin-left:14px; border-left:2px solid var(--line); padding-left:32px; display:flex; flex-direction:column; gap:40px;}
+  @media (max-width:600px){.timeline{margin-left:6px; padding-left:22px;}}
+
+  .phase{position:relative;}
+  .phase::before{
+    content:"";
+    position:absolute; left:-40px; top:2px;
+    width:16px; height:16px; border-radius:50%;
+    background:var(--accent); border:3px solid var(--bg);
+    box-shadow:0 0 0 2px var(--accent);
+  }
+  @media (max-width:600px){.phase::before{left:-29px; width:13px; height:13px;}}
+  .phase.status-now::before{background:var(--accent);}
+  .phase.status-next::before{background:var(--blue); box-shadow:0 0 0 2px var(--blue);}
+  .phase.status-later::before{background:var(--amber); box-shadow:0 0 0 2px var(--amber);}
+
+  .phase-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:4px;}
+  .phase-head h2{font-family:var(--font-display); font-size:21px; margin:0;}
+  .phase-tag{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:3px 9px; border-radius:20px;}
+  .status-now .phase-tag{background:var(--accent-soft); color:var(--accent-ink);}
+  .status-next .phase-tag{background:var(--blue-soft); color:var(--blue);}
+  .status-later .phase-tag{background:var(--amber-soft); color:var(--amber);}
+  .phase-when{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);}
+  .phase-goal{color:var(--ink-soft); margin:6px 0 16px; max-width:62ch;}
+
+  .phase-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 20px;}
+  .phase-card h3{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin:0 0 10px;}
+  .phase-card ul{margin:0 0 16px; padding-left:18px;}
+  .phase-card ul:last-child{margin-bottom:0;}
+  .phase-card li{margin-bottom:6px; font-size:14.5px;}
+  .exit{border-left:3px solid var(--accent); padding:8px 14px; border-radius:0 8px 8px 0; background:var(--accent-soft); font-size:13.5px; color:var(--ink);}
+
+  .depgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:32px;}
+  .depcard{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px;}
+  .depcard b{display:block; font-family:var(--font-display); font-size:14.5px; margin-bottom:4px;}
+  .depcard span{color:var(--ink-soft); font-size:13.5px;}
+
+  section.notgoing{margin-top:48px; border-top:1px solid var(--line); padding-top:24px;}
+  section.notgoing h2{font-family:var(--font-display); font-size:19px; margin:0 0 6px;}
+  section.notgoing p.lede{color:var(--ink-soft); margin:0 0 14px; max-width:62ch;}
+  section.notgoing ul{margin:0; padding-left:20px;}
+  section.notgoing li{margin-bottom:8px; font-size:14.5px;}
+
+  footer{border-top:1px solid var(--line); padding-top:18px; margin-top:56px; color:var(--ink-soft); font-family:var(--font-mono); font-size:12px;}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">Product Roadmap</p>
+    <h1>ChildTaskTracker</h1>
+    <p class="sub">From working single-family prototype to a networked, multi-household tool — sequenced by what unlocks real use first, and what's genuinely optional.</p>
+    <div class="meta">
+      <span>DRAFT v1.0</span>
+      <span>2026-09-15</span>
+      <span>OWNER Adam Helwa</span>
+      <span>COMPANION TO <a href="https://github.com/adamhelwa/ChildTaskTracker" style="color:var(--accent-ink)">ChildTaskTracker PRD</a></span>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--accent)"></span>Now — building</span>
+    <span><span class="dot" style="background:var(--blue)"></span>Next — pilot-driven</span>
+    <span><span class="dot" style="background:var(--amber)"></span>Later — only if the pilot demands it</span>
+  </div>
+
+  <div class="timeline">
+
+    <div class="phase status-now">
+      <div class="phase-head">
+        <h2>Phase 0 — Prototype</h2>
+        <span class="phase-tag">Now</span>
+        <span class="phase-when">In progress</span>
+      </div>
+      <p class="phase-goal">Prove the full loop end-to-end on one machine, for one family, at near-zero cost. This is the scope defined in the PRD's MVP section.</p>
+      <div class="phase-card">
+        <h3>Ships</h3>
+        <ul>
+          <li>React front end + Node/Express + SQLite, running locally</li>
+          <li>Multiple children, mixed-recurrence tasks, points bank, reward catalog</li>
+          <li>Child completion → parent validation queue → 24h auto-approval</li>
+          <li>Streaks with one-day forgiveness; completion-rate, streak, and points/badge KPIs</li>
+          <li>On-demand OpenAI calls for starter tasks, reward recommendations, KPI summaries, reward-frequency tailoring — all constrained to the parent's own reward catalog</li>
+          <li>In-app notification center + toast; Parent A / Parent B view switcher</li>
+          <li>Age-adaptive theming (playful vs. clean skin)</li>
+        </ul>
+        <h3>Exit criteria</h3>
+        <div class="exit">The four usage metrics and four technical metrics in the PRD are all measurable end-to-end in one live session, without a human patching a broken step.</div>
+      </div>
+    </div>
+
+    <div class="phase status-next">
+      <div class="phase-head">
+        <h2>Phase 1 — Family Pilot</h2>
+        <span class="phase-tag">Next</span>
+        <span class="phase-when">First 4–6 weeks of real use</span>
+      </div>
+      <p class="phase-goal">Run it with your own kids. This phase produces the data that decides everything after it — no new features unless the pilot surfaces a real gap.</p>
+      <div class="phase-card">
+        <h3>Focus</h3>
+        <ul>
+          <li>Track the PRD's usage metrics weekly: completion rate, streak retention, validation turnaround, redemption rate</li>
+          <li>Tune AI prompt templates against real KPI summaries and reward recommendations — check they stay inside guardrails and actually sound like something a kid or parent would want to read</li>
+          <li>Watch the 24h auto-approve and one-day streak-forgiveness rules against real family rhythm; adjust the thresholds, not the mechanism, if they feel wrong</li>
+          <li>Log every corner case actually hit that isn't already in the PRD's corner-case table</li>
+        </ul>
+        <h3>Exit criteria</h3>
+        <div class="exit">Either the usage targets are being hit consistently, or you have a specific, named reason they aren't — not a vague "needs polish."</div>
+      </div>
+    </div>
+
+    <div class="phase status-later">
+      <div class="phase-head">
+        <h2>Phase 2 — Real Two-Parent Access</h2>
+        <span class="phase-tag">Later</span>
+        <span class="phase-when">Only if Phase 1 shows the view-switcher is the bottleneck</span>
+      </div>
+      <p class="phase-goal">Replace the simulated Parent A/B switcher with something that works when parents are actually on separate devices.</p>
+      <div class="phase-card">
+        <h3>Focus</h3>
+        <ul>
+          <li>Lightweight parent auth (even just a shared PIN per parent) instead of a view switcher</li>
+          <li>Real push notifications (FCM/APNs) replacing the in-app toast as the primary alert</li>
+          <li>Backend reachable from both parents' devices — local network first, cheap cloud hosting if the family isn't always on the same WiFi</li>
+        </ul>
+        <h3>Exit criteria</h3>
+        <div class="exit">A task marked complete on the child's device produces a real, working notification on both parents' separate phones without anyone opening the app first.</div>
+      </div>
+    </div>
+
+    <div class="phase status-later">
+      <div class="phase-head">
+        <h2>Phase 3 — Richer Insight</h2>
+        <span class="phase-tag">Later</span>
+        <span class="phase-when">Only once there's enough history to show trends</span>
+      </div>
+      <p class="phase-goal">The KPI set stays deliberately thin in Phase 0–1 (completion rate, streaks, points) because there isn't enough data yet to make more sophisticated views worth the build cost.</p>
+      <div class="phase-card">
+        <h3>Focus</h3>
+        <ul>
+          <li>Category-level KPI breakdowns (e.g. "strong at chores, needs work on homework")</li>
+          <li>Multi-week trend charts, once there's more than a few weeks of history to chart</li>
+          <li>Revisit AI call cadence — a weekly batch summary may become worth the small added cost once there's a real trend to summarize</li>
+        </ul>
+        <h3>Exit criteria</h3>
+        <div class="exit">At least 6–8 weeks of completion history exist for a category breakdown or trend line to say anything a single week's KPIs don't already show.</div>
+      </div>
+    </div>
+
+    <div class="phase status-later">
+      <div class="phase-head">
+        <h2>Phase 4 — Beyond One Household</h2>
+        <span class="phase-tag">Later</span>
+        <span class="phase-when">Only if there's a reason to extend past this family</span>
+      </div>
+      <p class="phase-goal">Everything here was explicitly deferred in the PRD because it adds real complexity (auth, tenancy, moderation) that a single-family prototype doesn't need.</p>
+      <div class="phase-card">
+        <h3>Focus</h3>
+        <ul>
+          <li>Read-only sharing for extended family (grandparents, babysitters)</li>
+          <li>Separated-household mode — two independent parent accounts on one shared child record</li>
+          <li>Fully custom task scheduling beyond daily/weekday/weekly/one-off</li>
+          <li>Multi-tenant architecture, if this ever moves from personal tool toward a product other families could use</li>
+        </ul>
+        <h3>Exit criteria</h3>
+        <div class="exit">A specific household or use case actually needs one of these — not speculative demand.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="depgrid">
+    <div class="depcard"><b>Phase 1 needs</b><span>Phase 0 fully working — no pilot without a working loop</span></div>
+    <div class="depcard"><b>Phase 2 needs</b><span>Phase 1 evidence that the switcher, not the concept, is the limit</span></div>
+    <div class="depcard"><b>Phase 3 needs</b><span>Weeks of real completion data from Phase 1–2 — the feature is worthless without history</span></div>
+    <div class="depcard"><b>Phase 4 needs</b><span>A concrete second household or use case — not "eventually might"</span></div>
+  </div>
+
+  <section class="notgoing">
+    <h2>Deliberately not on this roadmap</h2>
+    <p class="lede">Named so they don't quietly creep back in as "quick additions."</p>
+    <ul>
+      <li><strong>App store packaging.</strong> This stays a browser-based, locally-run tool unless a phase explicitly reopens that decision — native builds bring signing, review, and distribution overhead this project isn't scoped for.</li>
+      <li><strong>Monetary or screen-time rewards generated by AI.</strong> The guardrail in the PRD is permanent, not a Phase 0 shortcut — the model recommends only from the parent's own catalog, at every phase.</li>
+      <li><strong>In-app dispute/negotiation threads.</strong> Validation disagreements stay an offline, face-to-face conversation by design, not a feature gap to fill later.</li>
+    </ul>
+  </section>
+
+  <footer>ChildTaskTracker — Roadmap v1.0 — 2026-09-15</footer>
+</div>
