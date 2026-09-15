@@ -1,0 +1,230 @@
+<title>Chore Quest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF7E6;
+    --surface:#FFFFFF;
+    --ink:#3A2B1E;
+    --ink-soft:#8A7460;
+    --grass:#4CAE71;
+    --grass-deep:#358A56;
+    --coral:#FF8A5C;
+    --coral-deep:#E96A3B;
+    --sky:#3FA9D6;
+    --sun:#FFC53D;
+    --line:#F0DFC0;
+    --card-shadow:0 6px 0 rgba(58,43,30,.10);
+    --font-display:"Fredoka",ui-rounded,sans-serif;
+    --font-body:"Nunito",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-body); padding-inline:24px; line-height:1.55;}
+  .shell{max-width:1100px; margin:0 auto;}
+
+  nav{display:flex; align-items:center; justify-content:space-between; padding-block:24px;}
+  .brand{font-family:var(--font-display); font-weight:700; font-size:21px; display:flex; align-items:center; gap:8px;}
+  .brand .mascot{font-size:26px;}
+  nav .links{display:flex; gap:28px; font-weight:700; font-size:14.5px; color:var(--ink-soft);}
+  @media (max-width:680px){nav .links{display:none;}}
+  .btn-nav{
+    font-family:var(--font-display); font-weight:600; font-size:14px;
+    background:var(--grass); color:#fff; border:none; padding:10px 20px;
+    border-radius:14px; box-shadow:0 4px 0 var(--grass-deep); cursor:pointer;
+  }
+
+  header.hero{
+    padding-block:36px 60px;
+    display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center;
+    position:relative;
+  }
+  @media (max-width:860px){header.hero{grid-template-columns:1fr;}}
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-display); font-weight:600; font-size:13px;
+    background:#fff; border:2px solid var(--line); color:var(--coral-deep);
+    padding:6px 14px; border-radius:100px; margin-bottom:20px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(36px,5vw,54px); line-height:1.05; margin:0 0 18px; text-wrap:balance;
+  }
+  h1 .pop{color:var(--grass-deep);}
+  .lede{font-size:17.5px; color:var(--ink-soft); max-width:44ch; margin:0 0 28px; font-weight:600;}
+
+  .hero-actions{display:flex; gap:16px; align-items:center; flex-wrap:wrap;}
+  .btn-primary{
+    font-family:var(--font-display); font-weight:600; font-size:16px;
+    background:var(--coral); color:#fff; border:none; padding:16px 30px;
+    border-radius:16px; box-shadow:0 6px 0 var(--coral-deep); cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .btn-primary:active{transform:translateY(4px); box-shadow:0 2px 0 var(--coral-deep);}
+  .btn-primary:focus-visible{outline:3px solid var(--sky); outline-offset:3px;}
+  .btn-ghost{font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--ink-soft); background:none; border:none; cursor:pointer; text-decoration:underline; text-decoration-style:wavy; text-decoration-color:var(--line);}
+
+  .streak-pill{display:inline-flex; align-items:center; gap:8px; margin-top:22px; font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--coral-deep);}
+  .streak-pill .flame{font-size:18px;}
+
+  /* Hero card: quest board */
+  .quest-board{
+    background:var(--surface); border-radius:28px; padding:26px 24px;
+    box-shadow:var(--card-shadow); position:relative;
+    border:3px solid #fff;
+  }
+  .quest-board .mascot-row{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
+  .mascot-avatar{
+    width:52px; height:52px; border-radius:50%; background:var(--sun);
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    box-shadow:0 4px 0 #E3A400;
+  }
+  .mascot-row .name{font-family:var(--font-display); font-weight:700; font-size:16px;}
+  .mascot-row .points{font-family:var(--font-display); font-weight:600; font-size:13px; color:var(--grass-deep);}
+
+  .quest{
+    display:flex; align-items:center; gap:12px;
+    background:var(--bg); border-radius:16px; padding:12px 14px; margin-bottom:10px;
+    font-family:var(--font-display); font-weight:600; font-size:14.5px;
+  }
+  .quest .icon{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex:none;}
+  .quest.done{opacity:.55;}
+  .quest.done .icon{background:var(--grass); color:#fff;}
+  .quest:nth-child(2) .icon{background:#FFE3C4; }
+  .quest:nth-child(3) .icon{background:#D9F0E5;}
+  .quest:nth-child(4) .icon{background:#E0F0FA;}
+  .quest .plus{margin-left:auto; font-family:var(--font-display); font-size:12.5px; color:var(--grass-deep); background:#E4F5EA; padding:3px 9px; border-radius:100px;}
+
+  /* Features */
+  section.features{padding-block:56px 40px;}
+  .features-head{text-align:center; max-width:52ch; margin:0 auto 40px;}
+  .features-head .eyebrow{margin-bottom:16px;}
+  .features-head h2{font-family:var(--font-display); font-weight:700; font-size:clamp(26px,3.4vw,34px); margin:0 0 12px; text-wrap:balance;}
+  .features-head p{color:var(--ink-soft); font-weight:600; margin:0;}
+
+  .feature-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:780px){.feature-cards{grid-template-columns:1fr;}}
+  .fcard{
+    background:var(--surface); border-radius:22px; padding:26px 22px;
+    box-shadow:var(--card-shadow); border:3px solid #fff;
+  }
+  .fcard .badge{
+    width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; margin-bottom:16px;
+  }
+  .fcard:nth-child(1) .badge{background:var(--coral); }
+  .fcard:nth-child(2) .badge{background:var(--sky);}
+  .fcard:nth-child(3) .badge{background:var(--sun);}
+  .fcard h3{font-family:var(--font-display); font-weight:700; font-size:18px; margin:0 0 8px;}
+  .fcard p{color:var(--ink-soft); font-size:14.5px; font-weight:600; margin:0;}
+
+  /* Reward shelf */
+  section.rewards{padding-block:48px; background:var(--surface); border-radius:32px; margin-block:24px; border:3px solid #fff; box-shadow:var(--card-shadow);}
+  .rewards-inner{padding-inline:32px;}
+  @media (max-width:600px){.rewards-inner{padding-inline:18px;}}
+  .rewards h2{font-family:var(--font-display); font-weight:700; font-size:clamp(24px,3vw,30px); margin:0 0 6px; text-align:center;}
+  .rewards p.sub{text-align:center; color:var(--ink-soft); font-weight:600; margin:0 0 30px;}
+  .reward-row{display:flex; gap:16px; overflow-x:auto; padding-bottom:8px;}
+  .reward{
+    flex:none; width:170px; background:var(--bg); border-radius:18px; padding:18px 16px; text-align:center;
+  }
+  .reward .emoji{font-size:32px; margin-bottom:10px;}
+  .reward .title{font-family:var(--font-display); font-weight:600; font-size:14px; margin-bottom:6px;}
+  .reward .cost{font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--grass-deep);}
+
+  footer.cta{text-align:center; padding-block:64px 56px;}
+  footer.cta h2{font-family:var(--font-display); font-weight:700; font-size:clamp(28px,4vw,38px); margin:0 0 14px; text-wrap:balance;}
+  footer.cta p{color:var(--ink-soft); font-weight:600; max-width:40ch; margin:0 auto 26px;}
+  .foot-meta{margin-top:56px; padding-top:20px; border-top:2px solid var(--line); display:flex; justify-content:space-between; font-family:var(--font-display); font-weight:600; font-size:12px; color:var(--ink-soft); padding-bottom:28px;}
+</style>
+
+<div class="shell">
+  <nav>
+    <div class="brand"><span class="mascot">🦉</span>ChildTaskTracker</div>
+    <div class="links">
+      <a href="#features">Quests</a>
+      <a href="#rewards">Rewards</a>
+      <a href="#start">For parents</a>
+    </div>
+    <button class="btn-nav">Start free</button>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <span class="eyebrow">🎈 Concept B — Warm &amp; Playful</span>
+      <h1>Chores just got<br><span class="pop">a lot more fun.</span></h1>
+      <p class="lede">Every brush, bag-pack and homework block becomes a little quest. Kids earn points, you decide every reward — nobody negotiates at bedtime again.</p>
+      <div class="hero-actions">
+        <button class="btn-primary">Start the adventure</button>
+        <button class="btn-ghost">See today's quests</button>
+      </div>
+      <div class="streak-pill"><span class="flame">🔥</span> Join 1,200+ families on a daily streak</div>
+    </div>
+
+    <div class="quest-board">
+      <div class="mascot-row">
+        <div class="mascot-avatar">🦉</div>
+        <div>
+          <div class="name">Emma's Quests</div>
+          <div class="points">⭐ 140 points · Level 3</div>
+        </div>
+      </div>
+      <div class="quest done"><span class="icon">🪥</span> Brush teeth <span class="plus">+10</span></div>
+      <div class="quest"><span class="icon">🎒</span> Pack school bag <span class="plus">+10</span></div>
+      <div class="quest"><span class="icon">📚</span> Homework block <span class="plus">+20</span></div>
+      <div class="quest"><span class="icon">🛏️</span> Make the bed <span class="plus">+10</span></div>
+    </div>
+  </header>
+
+  <section class="features" id="features">
+    <div class="features-head">
+      <span class="eyebrow">🎯 How it works</span>
+      <h2>Three simple moves, every day.</h2>
+      <p>Built for kids who love checking boxes — and parents who want a say in what happens next.</p>
+    </div>
+    <div class="feature-cards">
+      <div class="fcard">
+        <div class="badge">✅</div>
+        <h3>Tap to complete</h3>
+        <p>Big friendly buttons kids actually want to press. Every quest done adds points to their jar.</p>
+      </div>
+      <div class="fcard">
+        <div class="badge">👀</div>
+        <h3>Parents give the nod</h3>
+        <p>A quick check-in, then approve in the app. Both parents see it the moment it happens.</p>
+      </div>
+      <div class="fcard">
+        <div class="badge">🎁</div>
+        <h3>Cash in for real rewards</h3>
+        <p>Points build toward rewards you set — movie night, ice cream, a bigger allowance. Always your call.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="rewards" id="rewards">
+    <div class="rewards-inner">
+      <h2>The reward shelf</h2>
+      <p class="sub">Parent-picked, kid-earned.</p>
+      <div class="reward-row">
+        <div class="reward"><div class="emoji">🍦</div><div class="title">Ice cream trip</div><div class="cost">60 pts</div></div>
+        <div class="reward"><div class="emoji">🎬</div><div class="title">Pick movie night</div><div class="cost">80 pts</div></div>
+        <div class="reward"><div class="emoji">🧸</div><div class="title">New toy</div><div class="cost">150 pts</div></div>
+        <div class="reward"><div class="emoji">💰</div><div class="title">Allowance bump</div><div class="cost">200 pts</div></div>
+        <div class="reward"><div class="emoji">🏕️</div><div class="title">Weekend adventure</div><div class="cost">250 pts</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="cta" id="start">
+    <h2>Ready to turn today into a quest?</h2>
+    <p>Add your first child and set of quests in under three minutes.</p>
+    <button class="btn-primary">Start the adventure</button>
+    <div class="foot-meta">
+      <span>ChildTaskTracker</span>
+      <span>Concept B / Warm &amp; Playful</span>
+    </div>
+  </footer>
+</div>

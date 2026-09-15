@@ -1,0 +1,261 @@
+<title>Quiet Rhythm</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,340;9..144,480&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFCFA;
+    --surface:#FFFFFF;
+    --ink:#26302B;
+    --ink-soft:#69756E;
+    --line:#E4E7E1;
+    --sage:#5C9179;
+    --sage-deep:#3F6B56;
+    --wash-sky:#D9EBF0;
+    --wash-coral:#F5DCD3;
+    --wash-lemon:#F1EAC7;
+    --wash-sky-ink:#3E6C78;
+    --wash-coral-ink:#8A5A48;
+    --wash-lemon-ink:#7A6A2E;
+    --font-display:"Fraunces",Georgia,serif;
+    --font-body:"Work Sans",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.6;
+    padding-inline:24px;
+  }
+  a{color:inherit;}
+  .shell{max-width:1080px; margin:0 auto;}
+
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-block:28px;
+  }
+  .brand{font-family:var(--font-display); font-size:19px; font-weight:480; letter-spacing:.01em; display:flex; align-items:center; gap:9px;}
+  .brand .mark{width:9px; height:9px; border-radius:50%; background:var(--sage);}
+  nav .links{display:flex; gap:32px; font-size:14.5px; color:var(--ink-soft);}
+  nav .cta-small{
+    font-size:13.5px; font-family:var(--font-mono); color:var(--sage-deep);
+    border:1px solid var(--line); padding:8px 16px; border-radius:100px;
+  }
+  @media (max-width:640px){ nav .links{display:none;} }
+
+  header.hero{
+    padding-block:56px 72px;
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:56px;
+    align-items:center;
+  }
+  @media (max-width:860px){ header.hero{grid-template-columns:1fr; padding-block:24px 48px;} }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--sage-deep); margin-bottom:18px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{content:""; width:16px; height:1px; background:var(--sage-deep);}
+
+  h1{
+    font-family:var(--font-display); font-weight:480;
+    font-size:clamp(38px,5vw,58px);
+    line-height:1.06;
+    margin:0 0 22px;
+    text-wrap:balance;
+    letter-spacing:-.01em;
+  }
+  h1 em{font-style:italic; color:var(--sage-deep);}
+
+  .lede{font-size:17.5px; color:var(--ink-soft); max-width:46ch; margin:0 0 32px;}
+
+  .hero-actions{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--sage); color:#fff; border:none;
+    font-family:var(--font-body); font-weight:600; font-size:15px;
+    padding:14px 26px; border-radius:100px; cursor:pointer;
+    transition:background .18s ease, transform .18s ease;
+  }
+  .btn-primary:hover{background:var(--sage-deep); transform:translateY(-1px);}
+  .btn-primary:focus-visible{outline:2px solid var(--sage-deep); outline-offset:3px;}
+  .link-quiet{font-size:14.5px; color:var(--ink-soft); text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--line);}
+
+  /* Signature: the week strip */
+  .week-strip{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:28px 26px 24px;
+  }
+  .week-strip .label{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px;}
+  .days{display:flex; justify-content:space-between; gap:6px; margin-bottom:22px;}
+  .day{display:flex; flex-direction:column; align-items:center; gap:8px; flex:1;}
+  .day .dname{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft);}
+  .day .dot{
+    width:34px; height:34px; border-radius:50%;
+    border:1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    animation:fillin .5s ease both;
+  }
+  .day.done .dot{background:var(--wash-sky); border-color:var(--wash-sky); color:var(--wash-sky-ink);}
+  .day.today .dot{border-color:var(--sage); border-width:2px;}
+  .day:nth-child(1) .dot{animation-delay:.02s;}
+  .day:nth-child(2) .dot{animation-delay:.08s;}
+  .day:nth-child(3) .dot{animation-delay:.14s;}
+  .day:nth-child(4) .dot{animation-delay:.2s;}
+  .day:nth-child(5) .dot{animation-delay:.26s;}
+  @keyframes fillin{ from{ transform:scale(.7); opacity:0;} to{ transform:scale(1); opacity:1;} }
+
+  .task-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--line); font-size:14.5px;}
+  .task-row:first-of-type{border-top:1px solid var(--line);}
+  .task-row .check{
+    width:20px; height:20px; border-radius:6px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:12px;
+  }
+  .task-row.mint .check{background:var(--wash-sky); color:var(--wash-sky-ink);}
+  .task-row.coral .check{background:var(--wash-coral); color:var(--wash-coral-ink);}
+  .task-row.lemon .check{background:var(--wash-lemon); color:var(--wash-lemon-ink); }
+  .task-row .who{margin-left:auto; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft);}
+
+  @media (prefers-reduced-motion:reduce){ .day .dot{animation:none;} }
+
+  /* Feature band */
+  section.features{padding-block:64px; border-top:1px solid var(--line);}
+  .features-head{max-width:52ch; margin-bottom:44px;}
+  .features-head .eyebrow{margin-bottom:14px;}
+  .features-head h2{font-family:var(--font-display); font-weight:480; font-size:clamp(26px,3vw,32px); margin:0 0 12px; text-wrap:balance;}
+  .features-head p{color:var(--ink-soft); margin:0; font-size:15.5px;}
+
+  .feature-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  @media (max-width:760px){ .feature-grid{grid-template-columns:1fr;} }
+  .feature{background:var(--surface); padding:32px 28px;}
+  .feature .wash{width:38px; height:38px; border-radius:10px; margin-bottom:20px; display:flex; align-items:center; justify-content:center; font-size:17px;}
+  .feature:nth-child(1) .wash{background:var(--wash-sky); color:var(--wash-sky-ink);}
+  .feature:nth-child(2) .wash{background:var(--wash-coral); color:var(--wash-coral-ink);}
+  .feature:nth-child(3) .wash{background:var(--wash-lemon); color:var(--wash-lemon-ink);}
+  .feature h3{font-family:var(--font-display); font-weight:480; font-size:19px; margin:0 0 10px;}
+  .feature p{color:var(--ink-soft); font-size:14.5px; margin:0;}
+
+  /* Quote / reassurance band */
+  section.reassure{
+    padding-block:56px;
+    border-top:1px solid var(--line);
+    display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;
+  }
+  @media (max-width:760px){ section.reassure{grid-template-columns:1fr;} }
+  section.reassure blockquote{
+    font-family:var(--font-display); font-weight:480; font-style:italic;
+    font-size:clamp(20px,2.4vw,25px); line-height:1.4; margin:0; color:var(--ink);
+    text-wrap:balance;
+  }
+  section.reassure blockquote cite{
+    display:block; font-family:var(--font-mono); font-style:normal; font-size:12px;
+    color:var(--ink-soft); margin-top:16px; letter-spacing:.03em;
+  }
+  .stat-list{display:flex; flex-direction:column; gap:18px;}
+  .stat{display:flex; align-items:baseline; gap:14px; border-top:1px solid var(--line); padding-top:14px;}
+  .stat:first-child{border-top:none; padding-top:0;}
+  .stat .n{font-family:var(--font-mono); font-size:22px; color:var(--sage-deep);}
+  .stat .d{font-size:13.5px; color:var(--ink-soft);}
+
+  footer.cta{
+    padding-block:64px 56px; border-top:1px solid var(--line);
+    text-align:center;
+  }
+  footer.cta h2{font-family:var(--font-display); font-weight:480; font-size:clamp(26px,3.4vw,36px); margin:0 0 14px; text-wrap:balance;}
+  footer.cta p{color:var(--ink-soft); max-width:42ch; margin:0 auto 28px;}
+  .foot-meta{margin-top:64px; padding-top:20px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); padding-bottom:32px;}
+</style>
+
+<div class="shell">
+  <nav>
+    <div class="brand"><span class="mark"></span>ChildTaskTracker</div>
+    <div class="links">
+      <a href="#features">How it works</a>
+      <a href="#reassure">For parents</a>
+      <a href="#start">Rewards</a>
+    </div>
+    <a class="cta-small" href="#start">Start free</a>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Concept A — Calm &amp; minimal</p>
+      <h1>A quieter way to<br>build good <em>habits.</em></h1>
+      <p class="lede">No leaderboards, no nagging notifications every hour. Just a gentle daily rhythm — your child checks off what's done, you confirm with a glance, and the week fills in on its own.</p>
+      <div class="hero-actions">
+        <button class="btn-primary">Start your family's week</button>
+        <a class="link-quiet" href="#features">See how validation works →</a>
+      </div>
+    </div>
+
+    <div class="week-strip">
+      <div class="label">Emma · This week</div>
+      <div class="days">
+        <div class="day done"><span class="dname">M</span><span class="dot">✓</span></div>
+        <div class="day done"><span class="dname">T</span><span class="dot">✓</span></div>
+        <div class="day done"><span class="dname">W</span><span class="dot">✓</span></div>
+        <div class="day today"><span class="dname">T</span><span class="dot">·</span></div>
+        <div class="day"><span class="dname">F</span><span class="dot"></span></div>
+        <div class="day"><span class="dname">S</span><span class="dot"></span></div>
+        <div class="day"><span class="dname">S</span><span class="dot"></span></div>
+      </div>
+      <div class="task-row mint"><span class="check">✓</span> Brush teeth <span class="who">approved</span></div>
+      <div class="task-row coral"><span class="check">✓</span> Pack school bag <span class="who">approved</span></div>
+      <div class="task-row lemon"><span class="check">·</span> Homework <span class="who">waiting</span></div>
+    </div>
+  </header>
+
+  <section class="features" id="features">
+    <div class="features-head">
+      <p class="eyebrow">How it works</p>
+      <h2>Three quiet steps, every day.</h2>
+      <p>Each task carries its own soft colour — a private visual language your family learns without ever thinking about it.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <div class="wash">✓</div>
+        <h3>Check it off</h3>
+        <p>Your child marks a task done from their own simple list — teeth, homework, lunch, bedtime. No timers, no pressure.</p>
+      </div>
+      <div class="feature">
+        <div class="wash">◔</div>
+        <h3>Confirm with a glance</h3>
+        <p>You get one soft notification. Check in, tap approve. If life gets busy, it approves itself after a day.</p>
+      </div>
+      <div class="feature">
+        <div class="wash">✦</div>
+        <h3>Watch the week fill in</h3>
+        <p>Points build quietly toward rewards you've already agreed on — never a surprise, never a negotiation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="reassure" id="reassure">
+    <blockquote>
+      "We didn't want another app shouting at our kids. We wanted something that just... kept up with them."
+      <cite>— a note from the design brief, not a testimonial we made up</cite>
+    </blockquote>
+    <div class="stat-list">
+      <div class="stat"><span class="n">2</span><span class="d">taps for a parent to validate a task</span></div>
+      <div class="stat"><span class="n">24h</span><span class="d">before an unreviewed task quietly approves itself</span></div>
+      <div class="stat"><span class="n">0</span><span class="d">push notifications outside the daily digest</span></div>
+    </div>
+  </section>
+
+  <footer class="cta" id="start">
+    <h2>Ready for a calmer evening routine?</h2>
+    <p>Set up your first child and task list in under three minutes.</p>
+    <button class="btn-primary">Start your family's week</button>
+    <div class="foot-meta">
+      <span>ChildTaskTracker</span>
+      <span>Concept A / Calm &amp; Minimal</span>
+    </div>
+  </footer>
+</div>

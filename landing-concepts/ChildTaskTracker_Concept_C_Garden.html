@@ -1,0 +1,236 @@
+<title>Blooming Path</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#BFE6F5;
+    --sky-bot:#EAF7EE;
+    --ground:#FFFFFF;
+    --ink:#233A2E;
+    --ink-soft:#5C7568;
+    --grass:#2EC46E;
+    --grass-deep:#1E9C54;
+    --pink:#FF6FA5;
+    --pink-deep:#E14D82;
+    --gold:#FFC93C;
+    --gold-deep:#E2A600;
+    --teal:#2EC4B6;
+    --teal-deep:#1B9A8E;
+    --line:#DCEFE0;
+    --font-display:"Baloo 2",ui-rounded,sans-serif;
+    --font-body:"Nunito",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bot) 340px, var(--ground) 340px);
+    color:var(--ink); font-family:var(--font-body); padding-inline:24px; line-height:1.55;
+    overflow-x:hidden;
+  }
+  .shell{max-width:1120px; margin:0 auto; position:relative;}
+
+  /* floating ambient icons */
+  .floaty{position:absolute; font-size:26px; opacity:.85; animation:drift 6s ease-in-out infinite;}
+  .floaty.f1{top:18px; left:6%; animation-delay:.2s;}
+  .floaty.f2{top:70px; right:10%; font-size:22px; animation-delay:1.1s;}
+  .floaty.f3{top:150px; left:2%; font-size:20px; animation-delay:2s;}
+  .floaty.f4{top:10px; right:34%; font-size:18px; animation-delay:.6s;}
+  @keyframes drift{ 0%,100%{transform:translateY(0) rotate(-3deg);} 50%{transform:translateY(-12px) rotate(4deg);} }
+  @media (max-width:760px){ .floaty{display:none;} }
+  @media (prefers-reduced-motion:reduce){ .floaty{animation:none;} }
+
+  nav{display:flex; align-items:center; justify-content:space-between; padding-block:24px; position:relative; z-index:2;}
+  .brand{font-family:var(--font-display); font-weight:700; font-size:21px; display:flex; align-items:center; gap:8px; color:var(--ink);}
+  nav .links{display:flex; gap:28px; font-weight:700; font-size:14.5px; color:var(--ink-soft);}
+  @media (max-width:680px){nav .links{display:none;}}
+  .btn-nav{font-family:var(--font-display); font-weight:600; font-size:14px; background:var(--grass); color:#fff; border:none; padding:10px 20px; border-radius:14px; box-shadow:0 4px 0 var(--grass-deep); cursor:pointer;}
+
+  header.hero{padding-block:20px 56px; text-align:center; position:relative; z-index:2;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; font-size:13px;
+    background:#fff; border:2px solid var(--line); color:var(--pink-deep); padding:6px 14px; border-radius:100px; margin-bottom:22px;
+  }
+  h1{font-family:var(--font-display); font-weight:800; font-size:clamp(34px,5.6vw,58px); line-height:1.06; margin:0 auto 18px; max-width:16ch; text-wrap:balance;}
+  h1 .pop{color:var(--grass-deep);}
+  .lede{font-size:17.5px; color:var(--ink-soft); max-width:46ch; margin:0 auto 30px; font-weight:600;}
+  .hero-actions{display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:16px;}
+  .btn-primary{
+    font-family:var(--font-display); font-weight:700; font-size:16px; background:var(--pink); color:#fff; border:none;
+    padding:16px 30px; border-radius:16px; box-shadow:0 6px 0 var(--pink-deep); cursor:pointer; transition:transform .12s ease;
+  }
+  .btn-primary:active{transform:translateY(4px); box-shadow:0 2px 0 var(--pink-deep);}
+  .btn-primary:focus-visible{outline:3px solid var(--teal-deep); outline-offset:3px;}
+  .btn-ghost{font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--ink-soft); background:none; border:none; cursor:pointer; text-decoration:underline; text-decoration-style:wavy; text-decoration-color:var(--line);}
+
+  /* SIGNATURE: the blooming path */
+  .path-wrap{
+    background:var(--ground); border-radius:28px; padding:40px 28px 32px; margin-top:12px;
+    box-shadow:0 10px 0 var(--line); position:relative; z-index:2;
+  }
+  .path-label{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); text-align:left; margin-bottom:24px;}
+  .path{display:flex; align-items:flex-end; justify-content:space-between; gap:8px; position:relative; padding-inline:6px;}
+  .path::before{
+    content:""; position:absolute; left:26px; right:26px; bottom:21px; height:4px;
+    background:repeating-linear-gradient(90deg,var(--line) 0 10px, transparent 10px 18px);
+    z-index:0;
+  }
+  .stone{position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:10px; flex:1;}
+  .stone .bloom{font-size:26px; height:30px; display:flex; align-items:flex-end; animation:pop .5s ease both;}
+  .stone:nth-child(1) .bloom{animation-delay:.05s;}
+  .stone:nth-child(2) .bloom{animation-delay:.15s;}
+  .stone:nth-child(3) .bloom{animation-delay:.25s;}
+  .stone:nth-child(4) .bloom{animation-delay:.35s;}
+  .stone:nth-child(5) .bloom{animation-delay:.45s;}
+  @keyframes pop{ 0%{transform:scale(0); opacity:0;} 70%{transform:scale(1.2);} 100%{transform:scale(1); opacity:1;} }
+  .stone .disc{
+    width:42px; height:42px; border-radius:50%; background:var(--ground); border:4px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:16px; font-family:var(--font-display); color:var(--ink-soft);
+  }
+  .stone.bloomed .disc{border-color:var(--grass); background:var(--grass); color:#fff;}
+  .stone .glabel{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft); text-align:center;}
+  @media (prefers-reduced-motion:reduce){ .stone .bloom{animation:none;} }
+
+  .streakline{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:28px; font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--pink-deep);}
+
+  /* Task demo: animate a check → confetti */
+  section.demo{padding-block:64px 40px; text-align:center; position:relative;}
+  .demo-head{max-width:50ch; margin:0 auto 36px;}
+  .demo-head h2{font-family:var(--font-display); font-weight:700; font-size:clamp(26px,3.4vw,34px); margin:0 0 12px; text-wrap:balance;}
+  .demo-head p{color:var(--ink-soft); font-weight:600; margin:0;}
+
+  .demo-card{
+    max-width:380px; margin:0 auto; background:#fff; border-radius:24px; padding:26px 24px;
+    box-shadow:0 8px 0 var(--line); position:relative; overflow:visible;
+  }
+  .demo-task{display:flex; align-items:center; gap:14px; font-family:var(--font-display); font-weight:700; font-size:16px;}
+  .demo-check{
+    width:36px; height:36px; border-radius:50%; border:3px solid var(--grass); flex:none;
+    display:flex; align-items:center; justify-content:center; color:var(--grass); font-size:18px;
+    animation:checkpulse 2.4s ease-in-out infinite;
+  }
+  @keyframes checkpulse{ 0%,100%{ transform:scale(1);} 45%{ transform:scale(1.15); background:var(--grass); color:#fff;} 60%{transform:scale(1);} }
+  .confetti{position:absolute; inset:0; pointer-events:none;}
+  .confetti span{
+    position:absolute; top:40%; left:50%; font-size:15px;
+    animation:burst 2.4s ease-out infinite;
+    opacity:0;
+  }
+  .confetti span:nth-child(1){ --tx:-70px; --ty:-60px; animation-delay:.15s;}
+  .confetti span:nth-child(2){ --tx:60px; --ty:-70px; animation-delay:.2s;}
+  .confetti span:nth-child(3){ --tx:-40px; --ty:-90px; animation-delay:.25s;}
+  .confetti span:nth-child(4){ --tx:80px; --ty:-40px; animation-delay:.3s;}
+  .confetti span:nth-child(5){ --tx:10px; --ty:-95px; animation-delay:.35s;}
+  .confetti span:nth-child(6){ --tx:-90px; --ty:-30px; animation-delay:.4s;}
+  @keyframes burst{
+    0%{ transform:translate(-50%,-50%) translate(0,0) scale(.4) rotate(0deg); opacity:0;}
+    15%{ opacity:1;}
+    100%{ transform:translate(-50%,-50%) translate(var(--tx),var(--ty)) scale(1) rotate(180deg); opacity:0;}
+  }
+  @media (prefers-reduced-motion:reduce){ .demo-check{animation:none;} .confetti span{animation:none; opacity:0;} }
+  .demo-points{margin-top:16px; font-family:var(--font-mono); font-weight:600; font-size:13px; color:var(--grass-deep);}
+
+  /* Feature trio */
+  section.features{padding-block:56px;}
+  .feature-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:780px){.feature-cards{grid-template-columns:1fr;}}
+  .fcard{background:#fff; border-radius:22px; padding:26px 22px; box-shadow:0 6px 0 var(--line);}
+  .fcard .badge{width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;}
+  .fcard:nth-child(1) .badge{background:var(--pink);}
+  .fcard:nth-child(2) .badge{background:var(--teal);}
+  .fcard:nth-child(3) .badge{background:var(--gold);}
+  .fcard h3{font-family:var(--font-display); font-weight:700; font-size:18px; margin:0 0 8px;}
+  .fcard p{color:var(--ink-soft); font-size:14.5px; font-weight:600; margin:0;}
+
+  footer.cta{text-align:center; padding-block:60px 56px;}
+  footer.cta h2{font-family:var(--font-display); font-weight:800; font-size:clamp(28px,4vw,38px); margin:0 0 14px; text-wrap:balance;}
+  footer.cta p{color:var(--ink-soft); font-weight:600; max-width:40ch; margin:0 auto 26px;}
+  .foot-meta{margin-top:52px; padding-top:20px; border-top:2px solid var(--line); display:flex; justify-content:space-between; font-family:var(--font-display); font-weight:600; font-size:12px; color:var(--ink-soft); padding-bottom:28px;}
+</style>
+
+<div class="shell">
+  <span class="floaty f1">🪥</span>
+  <span class="floaty f2">📚</span>
+  <span class="floaty f3">🎒</span>
+  <span class="floaty f4">🍽️</span>
+
+  <nav>
+    <div class="brand">🌼 ChildTaskTracker</div>
+    <div class="links">
+      <a href="#demo">The path</a>
+      <a href="#features">Features</a>
+      <a href="#start">Get started</a>
+    </div>
+    <button class="btn-nav">Start free</button>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow">🌿 Concept C — Lively &amp; Animated</span>
+    <h1>Watch your kid's <span class="pop">day bloom.</span></h1>
+    <p class="lede">Every finished task blooms a flower on their path — a living, growing view of the day, cheered on in real time.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Plant today's first task</button>
+      <button class="btn-ghost">Watch it in action ↓</button>
+    </div>
+
+    <div class="path-wrap">
+      <div class="path-label">Emma's path · Today</div>
+      <div class="path">
+        <div class="stone bloomed"><span class="bloom">🌸</span><span class="disc">✓</span><span class="glabel">Teeth</span></div>
+        <div class="stone bloomed"><span class="bloom">🌷</span><span class="disc">✓</span><span class="glabel">Bag</span></div>
+        <div class="stone bloomed"><span class="bloom">🌻</span><span class="disc">✓</span><span class="glabel">Lunch</span></div>
+        <div class="stone"><span class="bloom"></span><span class="disc">4</span><span class="glabel">Homework</span></div>
+        <div class="stone"><span class="bloom"></span><span class="disc">5</span><span class="glabel">Bedtime</span></div>
+      </div>
+      <div class="streakline">🔥 6-day streak — two more blooms to a full garden</div>
+    </div>
+  </header>
+
+  <section class="demo" id="demo">
+    <div class="demo-head">
+      <h2>One tap. A little celebration.</h2>
+      <p>Every completion gets its own small burst — enough to feel earned, never enough to be a distraction.</p>
+    </div>
+    <div class="demo-card">
+      <div class="demo-task">
+        <span class="demo-check">✓</span> Homework block
+        <div class="confetti">
+          <span>🌸</span><span>✨</span><span>🌷</span><span>⭐</span><span>🌼</span><span>✨</span>
+        </div>
+      </div>
+      <div class="demo-points">+20 points → bloom added to today's path</div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="feature-cards">
+      <div class="fcard">
+        <div class="badge">🌱</div>
+        <h3>A path, not a checklist</h3>
+        <p>Today's tasks are stepping stones. Finishing one blooms it — the whole day becomes a garden to look back on.</p>
+      </div>
+      <div class="fcard">
+        <div class="badge">👀</div>
+        <h3>Parents tend the garden too</h3>
+        <p>Every bloom notifies both parents. A quick check-in, then approve — or it blooms on its own after a day.</p>
+      </div>
+      <div class="fcard">
+        <div class="badge">🏆</div>
+        <h3>Streaks grow the whole yard</h3>
+        <p>Consecutive days unlock bigger garden scenes and real rewards, hand-picked by you.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="cta" id="start">
+    <h2>Ready to plant the first seed?</h2>
+    <p>Add your first child and today's tasks in under three minutes.</p>
+    <button class="btn-primary">Plant today's first task</button>
+    <div class="foot-meta">
+      <span>ChildTaskTracker</span>
+      <span>Concept C / Lively &amp; Animated</span>
+    </div>
+  </footer>
+</div>
