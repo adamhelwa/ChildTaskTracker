@@ -659,7 +659,7 @@ function renderParentInsights(parentId, childId) {
 /* ---------- modals ---------- */
 function modalSettings() {
   const key = AI.getApiKey();
-  return `<div class="modal" onclick="event.stopPropagation()">
+  return `<div class="modal">
     <h3>⚙️ Settings</h3>
     <form id="form-settings">
       <div class="field"><label for="openai-key">OpenAI API key (optional)</label>
@@ -692,7 +692,7 @@ function renderStarterChecklist(result) {
 }
 
 function modalAddChild() {
-  return `<div class="modal" onclick="event.stopPropagation()">
+  return `<div class="modal">
     <h3>Add a child</h3>
     <form id="form-add-child">
       <div class="field"><label for="add-child-name">Name</label><input type="text" id="add-child-name" required maxlength="20"></div>
@@ -711,7 +711,7 @@ function modalTaskForm(childId, task) {
   const rec = task ? task.recurrence.type : 'daily';
   const weekday = task && task.recurrence.type === 'weekly' ? task.recurrence.weekday : 0;
   const emoji = task ? task.emoji : EMOJI_CHOICES[0];
-  return `<div class="modal" onclick="event.stopPropagation()">
+  return `<div class="modal">
     <h3>${task ? 'Edit task' : 'Add task'}</h3>
     <form id="form-task">
       <input type="hidden" id="task-id" value="${task ? task.id : ''}">
@@ -738,7 +738,7 @@ function modalTaskForm(childId, task) {
 
 function modalRewardForm(childId, reward) {
   const emoji = reward ? reward.emoji : REWARD_EMOJI_CHOICES[0];
-  return `<div class="modal" onclick="event.stopPropagation()">
+  return `<div class="modal">
     <h3>${reward ? 'Edit reward' : 'Add reward'}</h3>
     <form id="form-reward">
       <input type="hidden" id="reward-id" value="${reward ? reward.id : ''}">
@@ -757,7 +757,7 @@ function modalRewardForm(childId, reward) {
 }
 
 function modalConfirmRedeem(reward) {
-  return `<div class="modal" onclick="event.stopPropagation()">
+  return `<div class="modal">
     <h3>${reward.emoji} Redeem ${esc(reward.title)}?</h3>
     <p style="color:var(--ink-soft); margin-bottom:16px;">This will send a request to your parents for approval and hold ${reward.pointCost} points.</p>
     <div class="modal-actions">
