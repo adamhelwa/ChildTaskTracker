@@ -1,0 +1,255 @@
+<title>ChildTaskTracker Architecture</title>
+<style>
+  :root{
+    --bg:#F5F6FA;
+    --surface:#FFFFFF;
+    --ink:#1B2333;
+    --ink-soft:#5B6478;
+    --line:#E1E4ED;
+    --accent:#4C5FD5;
+    --accent-soft:#EAECFC;
+    --accent-ink:#33409E;
+    --ext:#0E9488;
+    --ext-soft:#DEF4F1;
+    --ext-ink:#0B7267;
+    --risk:#C2570E;
+    --risk-soft:#FBEBDC;
+    --risk-ink:#8C3F07;
+    --font-display:"Manrope",system-ui,sans-serif;
+    --font-body:"IBM Plex Sans",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12151C; --surface:#191D27; --ink:#E7E9F1; --ink-soft:#9AA2B4; --line:#2B3040;
+      --accent:#8B97F2; --accent-soft:#232A55; --accent-ink:#C2CAFB;
+      --ext:#5FD1C2; --ext-soft:#173B37; --ext-ink:#8FE7DA;
+      --risk:#E2954E; --risk-soft:#3A2A16; --risk-ink:#F3B87C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12151C; --surface:#191D27; --ink:#E7E9F1; --ink-soft:#9AA2B4; --line:#2B3040;
+    --accent:#8B97F2; --accent-soft:#232A55; --accent-ink:#C2CAFB;
+    --ext:#5FD1C2; --ext-soft:#173B37; --ext-ink:#8FE7DA;
+    --risk:#E2954E; --risk-soft:#3A2A16; --risk-ink:#F3B87C;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-body); margin:0; padding-inline:20px; line-height:1.6;}
+  .wrap{max-width:980px; margin:0 auto; padding-block:36px 64px;}
+
+  header{border-bottom:2px solid var(--line); padding-bottom:24px; margin-bottom:36px;}
+  .kicker{font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; font-size:12px; color:var(--accent-ink); margin:0 0 10px;}
+  h1{font-family:var(--font-display); font-weight:800; font-size:clamp(26px,4vw,36px); margin:0 0 10px; text-wrap:balance;}
+  header p{color:var(--ink-soft); max-width:66ch; margin:0; font-size:15.5px;}
+  header .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); margin-top:14px; display:flex; gap:16px; flex-wrap:wrap;}
+
+  h2{font-family:var(--font-display); font-weight:800; font-size:20px; margin:0 0 4px;}
+  .section-lede{color:var(--ink-soft); font-size:14px; margin:0 0 18px; max-width:68ch;}
+  section{margin-bottom:44px;}
+
+  figure{margin:0; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 18px 14px;}
+  figure + figure{margin-top:18px;}
+  figure svg{width:100%; height:auto; display:block; color:var(--ink);}
+  figcaption{font-size:13px; color:var(--ink-soft); margin-top:10px; padding-top:10px; border-top:1px solid var(--line);}
+  figcaption b{color:var(--ink); font-weight:700;}
+
+  .node-fill{fill:var(--surface); stroke:var(--ink-soft); stroke-width:1.3;}
+  .node-accent{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5;}
+  .node-ext{fill:var(--ext-soft); stroke:var(--ext); stroke-width:1.5;}
+  .node-decision{fill:var(--bg); stroke:var(--ink-soft); stroke-width:1.3;}
+  .edge{fill:none; stroke:var(--ink-soft); stroke-width:1.4;}
+  .edge-accent{fill:none; stroke:var(--accent); stroke-width:1.6;}
+  .edge-dash{fill:none; stroke:var(--ink-soft); stroke-width:1.3; stroke-dasharray:4 3;}
+  .lbl{font-family:var(--font-mono); font-size:10.5px; fill:var(--ink-soft);}
+  .lbl-accent{font-family:var(--font-mono); font-size:10.5px; fill:var(--accent-ink); font-weight:600;}
+  .node-title{font-family:var(--font-display); font-size:12.5px; font-weight:700; fill:var(--ink);}
+  .node-sub{font-family:var(--font-mono); font-size:9.5px; fill:var(--ink-soft);}
+
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  @media (max-width:820px){.grid3{grid-template-columns:1fr;}}
+  .col-head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
+  .col-head .ic{width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex:none;}
+  .col-head h3{font-family:var(--font-display); font-size:15.5px; margin:0;}
+  .col.tradeoffs .ic{background:var(--accent-soft); color:var(--accent-ink);}
+  .col.insights .ic{background:var(--ext-soft); color:var(--ext-ink);}
+  .col.risks .ic{background:var(--risk-soft); color:var(--risk-ink);}
+  .col{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px;}
+  .item{padding-block:12px; border-top:1px solid var(--line);}
+  .item:first-of-type{border-top:none; padding-top:0;}
+  .item .t{font-family:var(--font-display); font-weight:700; font-size:13.5px; margin-bottom:4px;}
+  .item p{margin:0; font-size:13px; color:var(--ink-soft);}
+
+  footer{border-top:1px solid var(--line); padding-top:18px; margin-top:8px; color:var(--ink-soft); font-family:var(--font-mono); font-size:11.5px;}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">System Architecture &amp; Data Flow</p>
+    <h1>ChildTaskTracker</h1>
+    <p>A static, backend-free front end: every screen, every write, and the optional AI call all happen inside one browser tab. The three figures below show how a file on GitHub becomes a running app, how a tap becomes persisted state, and where AI sits — as an optional, guarded detour, never a dependency.</p>
+    <div class="meta">
+      <span>v1.0</span>
+      <span>2026-09-16</span>
+      <span>github.com/adamhelwa/ChildTaskTracker</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>1 · Deployment</h2>
+    <p class="section-lede">How the four files in the repo reach a browser — no build step, no server.</p>
+    <figure>
+      <svg viewBox="0 0 720 140" role="img" aria-label="GitHub repo pushes to GitHub Pages, which a browser fetches index.html, app.js, ai.js and styles.css from directly.">
+        <defs>
+          <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <rect class="node-fill" x="20" y="42" width="170" height="56" rx="10"/>
+        <text class="node-title" x="105" y="66" text-anchor="middle">GitHub repo</text>
+        <text class="node-sub" x="105" y="82" text-anchor="middle">main branch</text>
+
+        <rect class="node-accent" x="275" y="42" width="190" height="56" rx="10"/>
+        <text class="node-title" x="370" y="62" text-anchor="middle">GitHub Pages</text>
+        <text class="node-sub" x="370" y="78" text-anchor="middle">Fastly CDN · cache max-age 600s</text>
+
+        <rect class="node-fill" x="550" y="42" width="150" height="56" rx="10"/>
+        <text class="node-title" x="625" y="66" text-anchor="middle">User's browser</text>
+        <text class="node-sub" x="625" y="82" text-anchor="middle">tab / device</text>
+
+        <line class="edge" x1="190" y1="70" x2="270" y2="70" marker-end="url(#arrow1)"/>
+        <text class="lbl" x="230" y="58" text-anchor="middle">git push</text>
+
+        <line class="edge" x1="465" y1="70" x2="545" y2="70" marker-end="url(#arrow1)"/>
+        <text class="lbl" x="505" y="58" text-anchor="middle">GET *.html/js/css</text>
+        <text class="lbl" x="505" y="112" text-anchor="middle">?v=N cache-busted</text>
+      </svg>
+      <figcaption><b>What this shows:</b> there is no server between the repo and the browser — the deployed artifact <em>is</em> the four static files, fetched fresh on every load and re-fetched on every deploy via a versioned query string.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>2 · Local data loop</h2>
+    <p class="section-lede">What happens inside the browser for every tap — marking a task, approving it, redeeming a reward, editing a name.</p>
+    <figure>
+      <svg viewBox="0 0 760 280" role="img" aria-label="A UI click calls a mutation function, which updates in-memory state, which is saved to localStorage and rendered to the DOM, which produces the next UI click, closing the loop.">
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <rect class="node-fill" x="20" y="30" width="150" height="56" rx="10"/>
+        <text class="node-title" x="95" y="54" text-anchor="middle">UI event</text>
+        <text class="node-sub" x="95" y="70" text-anchor="middle">data-action click</text>
+
+        <rect class="node-fill" x="210" y="30" width="170" height="56" rx="10"/>
+        <text class="node-title" x="295" y="54" text-anchor="middle">Mutation function</text>
+        <text class="node-sub" x="295" y="70" text-anchor="middle">markTaskDone(), approve…()</text>
+
+        <rect class="node-accent" x="420" y="30" width="150" height="56" rx="10"/>
+        <text class="node-title" x="495" y="54" text-anchor="middle">STATE</text>
+        <text class="node-sub" x="495" y="70" text-anchor="middle">one in-memory JS object</text>
+
+        <rect class="node-fill" x="350" y="165" width="150" height="56" rx="10"/>
+        <text class="node-title" x="425" y="189" text-anchor="middle">localStorage</text>
+        <text class="node-sub" x="425" y="205" text-anchor="middle">this browser only</text>
+
+        <rect class="node-fill" x="560" y="165" width="160" height="56" rx="10"/>
+        <text class="node-title" x="640" y="189" text-anchor="middle">render()</text>
+        <text class="node-sub" x="640" y="205" text-anchor="middle">DOM re-rendered</text>
+
+        <line class="edge" x1="170" y1="58" x2="205" y2="58" marker-end="url(#arrow2)"/>
+        <line class="edge" x1="380" y1="58" x2="415" y2="58" marker-end="url(#arrow2)"/>
+
+        <line class="edge" x1="470" y1="86" x2="425" y2="160" marker-end="url(#arrow2)"/>
+        <text class="lbl" x="410" y="128" text-anchor="middle">saveState()</text>
+
+        <line class="edge" x1="520" y1="86" x2="620" y2="160" marker-end="url(#arrow2)"/>
+        <text class="lbl" x="600" y="128" text-anchor="middle">render()</text>
+
+        <line class="edge-dash" x1="425" y1="165" x2="470" y2="90" marker-end="url(#arrow2)"/>
+        <text class="lbl" x="435" y="105" text-anchor="middle" transform="rotate(-58 435 105)">loadState() on boot</text>
+
+        <path class="edge" d="M 640 221 L 640 250 L 95 250 L 95 90" marker-end="url(#arrow2)"/>
+        <text class="lbl" x="370" y="266" text-anchor="middle">next interaction (tap)</text>
+      </svg>
+      <figcaption><b>What this shows:</b> every action follows the same one-way loop, and <b>localStorage is the only durable copy</b> — nothing here talks to a server, so this device is the single source of truth for this family's data.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>3 · AI request path</h2>
+    <p class="section-lede">What happens when a parent taps an AI-assisted button — always resolves to the same shape of result, with or without a key.</p>
+    <figure>
+      <svg viewBox="0 0 860 260" role="img" aria-label="An AI-assisted action checks for a saved OpenAI key: if present it fetches OpenAI's Chat Completions API directly from the browser, otherwise it runs a rule-based fallback; both paths converge on the same result shape fed back into state.">
+        <defs>
+          <marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <rect class="node-fill" x="20" y="100" width="170" height="60" rx="10"/>
+        <text class="node-title" x="105" y="126" text-anchor="middle">AI-assisted action</text>
+        <text class="node-sub" x="105" y="142" text-anchor="middle">Suggest reward / KPI recap</text>
+
+        <polygon class="node-decision" points="280,90 330,130 280,170 230,130"/>
+        <text class="node-title" x="280" y="126" text-anchor="middle" font-size="10.5">Key saved &amp;</text>
+        <text class="node-title" x="280" y="140" text-anchor="middle" font-size="10.5">call succeeds?</text>
+
+        <rect class="node-ext" x="380" y="30" width="230" height="56" rx="10"/>
+        <text class="node-title" x="495" y="52" text-anchor="middle">OpenAI Chat Completions</text>
+        <text class="node-sub" x="495" y="68" text-anchor="middle">fetch() · Authorization: Bearer &lt;local key&gt;</text>
+
+        <rect class="node-fill" x="380" y="174" width="230" height="56" rx="10"/>
+        <text class="node-title" x="495" y="196" text-anchor="middle">Rule-based fallback</text>
+        <text class="node-sub" x="495" y="212" text-anchor="middle">ai.js · deterministic logic</text>
+
+        <rect class="node-accent" x="660" y="100" width="180" height="60" rx="10"/>
+        <text class="node-title" x="750" y="126" text-anchor="middle">Same-shape result</text>
+        <text class="node-sub" x="750" y="142" text-anchor="middle">→ STATE → render()</text>
+
+        <line class="edge" x1="190" y1="130" x2="225" y2="130" marker-end="url(#arrow3)"/>
+
+        <path class="edge" d="M 280 90 L 280 58 L 375 58" marker-end="url(#arrow3)"/>
+        <text class="lbl-accent" x="300" y="50" text-anchor="middle">yes</text>
+
+        <path class="edge" d="M 280 170 L 280 202 L 375 202" marker-end="url(#arrow3)"/>
+        <text class="lbl" x="300" y="216" text-anchor="middle">no / error</text>
+
+        <path class="edge" d="M 610 58 L 640 58 L 640 120 L 655 120" marker-end="url(#arrow3)"/>
+        <path class="edge" d="M 610 202 L 640 202 L 640 140 L 655 140" marker-end="url(#arrow3)"/>
+      </svg>
+      <figcaption><b>What this shows:</b> the browser talks to OpenAI directly — there is no proxy to hide the key behind — but the app never <i>depends</i> on that call succeeding; a missing key, a network error, and a 429 all resolve through the same fallback lane to the same result shape.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Tradeoffs, insights, and risk management</h2>
+    <p class="section-lede">The decisions the three figures above are actually making, and why.</p>
+    <div class="grid3">
+      <div class="col tradeoffs">
+        <div class="col-head"><span class="ic">⚖️</span><h3>Design tradeoffs</h3></div>
+        <div class="item"><div class="t">No backend, no cross-device sync</div><p>Static hosting means zero infrastructure and "the HTML is the deploy," but each browser's localStorage is its own island — a parent's phone and a child's tablet don't sync. Two-parent sharing is a view switcher, not real accounts.</p></div>
+        <div class="item"><div class="t">Client calls OpenAI directly</div><p>No proxy to hide or rate-limit the key server-side — traded for matching the "no backend" brief exactly, and for keeping every user's key local to their own browser, never in the repo.</p></div>
+        <div class="item"><div class="t">Vanilla JS over a framework</div><p>No component diffing — the view re-renders from an HTML template string on every change. Traded for zero build step: the four files in the repo are the entire deployable artifact.</p></div>
+        <div class="item"><div class="t">Fallback as a first-class feature</div><p>Every AI-backed feature ships two implementations, model and rule-based, doubling the code per feature so the product behaves identically with or without a key.</p></div>
+      </div>
+      <div class="col insights">
+        <div class="col-head"><span class="ic">💡</span><h3>Technical insights</h3></div>
+        <div class="item"><div class="t">One stopPropagation broke every modal</div><p>Delegating all clicks to a single document listener means anything that stops a click from bubbling silently disables the app below that point — only live click-testing caught it, not reading the code.</p></div>
+        <div class="item"><div class="t">Hash routing vs. headless navigation</div><p>The router relies on real <code style="font-family:var(--font-mono)">location.hash</code> assignment, which fires <code style="font-family:var(--font-mono)">hashchange</code>; a testing tool's pushState-style navigation doesn't, and looked like a bug in the app when it wasn't.</p></div>
+        <div class="item"><div class="t">The CDN hides your own fixes</div><p>GitHub Pages' edge cache served stale JS after a push even once the origin was confirmed correct; versioned query strings made re-verification deterministic.</p></div>
+        <div class="item"><div class="t">Escaping has to cover AI output too</div><p>An OpenAI-suggested emoji or title is exactly as untrusted as anything a user typed — both land in the same <code style="font-family:var(--font-mono)">innerHTML</code> template.</p></div>
+      </div>
+      <div class="col risks">
+        <div class="col-head"><span class="ic">🛡️</span><h3>Risk management</h3></div>
+        <div class="item"><div class="t">Data loss</div><p>A family's entire history lives in one browser with no backup. Mitigated with an explicit, confirmed "Reset demo data" action rather than a silent clear, and documented as a known limitation.</p></div>
+        <div class="item"><div class="t">API key exposure</div><p>The key never leaves the browser it was entered in and is never written to a file this repo publishes — cloning the repo can never leak a key.</p></div>
+        <div class="item"><div class="t">Unsafe AI output reaching a child</div><p>Reward suggestions are constrained to the parent's own catalog by prompt design, money/screen-time are explicitly disallowed, and every call falls back to the same result shape so a bad response never surfaces as broken UI.</p></div>
+        <div class="item"><div class="t">XSS from user or AI text</div><p>One <code style="font-family:var(--font-mono)">esc()</code> helper escapes every dynamic string before it's templated into the DOM, applied uniformly to human-entered and AI-generated strings alike.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>ChildTaskTracker — Architecture &amp; Data Flow — v1.0</footer>
+</div>
