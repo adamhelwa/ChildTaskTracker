@@ -78,6 +78,7 @@ function buildSeedState() {
   const today = isoDate(new Date(now));
   const state = {
     clock: { simulatedNowMs: now, simulatedDate: today },
+    parentNames: { A: 'Parent A', B: 'Parent B' },
     children: [], tasks: [], completions: [], rewards: [], redemptions: [], pointsLedger: [], notifications: [],
   };
 
@@ -161,6 +162,7 @@ function buildSeedState() {
 function initApp() {
   STATE = loadState();
   if (!STATE) { STATE = buildSeedState(); saveState(); }
+  if (!STATE.parentNames) { STATE.parentNames = { A: 'Parent A', B: 'Parent B' }; saveState(); }
   checkAutoApprovals();
 }
 
@@ -295,6 +297,11 @@ function addChild(name, age) {
   saveState();
   return id;
 }
+function updateChild(id, data) { Object.assign(getChild(id), data); saveState(); }
+function setParentName(parentId, name) {
+  STATE.parentNames[parentId] = name.trim() || (parentId === 'A' ? 'Parent A' : 'Parent B');
+  saveState();
+}
 function addTask(childId, data) {
   const id = uid('t');
   STATE.tasks.push({ id, childId, active: true, ...data });
@@ -387,13 +394,14 @@ function bottomnavChild(childId, active) {
 }
 function topbarParent(parentId, childId, tab) {
   const badge = unreadCount(`parent_${parentId.toLowerCase()}`);
+  const nameA = esc(STATE.parentNames.A), nameB = esc(STATE.parentNames.B);
   return `<div class="topbar"><div class="topbar-inner">
     <button class="who" data-action="nav" data-href="#/"><span class="avatar" style="background:var(--ink); color:#fff;">👤</span>
-      <span><div class="name">Parent view</div></span>
+      <span><div class="name">${parentId === 'A' ? nameA : nameB}</div></span>
     </button>
     <div class="parent-toggle" role="group" aria-label="Switch parent">
-      <button class="${parentId === 'A' ? 'active' : ''}" data-action="set-parent" data-p="A" data-tab="${tab}" data-child="${childId || ''}">Parent A</button>
-      <button class="${parentId === 'B' ? 'active' : ''}" data-action="set-parent" data-p="B" data-tab="${tab}" data-child="${childId || ''}">Parent B</button>
+      <button class="${parentId === 'A' ? 'active' : ''}" data-action="set-parent" data-p="A" data-tab="${tab}" data-child="${childId || ''}" title="${nameA}">${nameA}</button>
+      <button class="${parentId === 'B' ? 'active' : ''}" data-action="set-parent" data-p="B" data-tab="${tab}" data-child="${childId || ''}" title="${nameB}">${nameB}</button>
     </div>
     <button class="icon-btn" data-action="open-notifs" aria-label="Notifications">🔔${badge ? `<span class="dot"></span>` : ''}</button>
     <button class="icon-btn" data-action="open-settings" aria-label="Settings">⚙️</button>
@@ -591,7 +599,8 @@ function renderParentChildren(parentId, childId) {
     ${child ? `<div class="card" style="margin-top:14px;">
       <div style="display:flex; align-items:center; gap:12px;">
         <span class="avatar">${child.avatar}</span>
-        <div><div style="font-family:var(--font-display); font-weight:700; font-size:16px;">${esc(child.name)}</div><div style="font-size:12.5px; color:var(--ink-soft);">Age ${child.age} · ⭐ ${child.points} points</div></div>
+        <div style="flex:1;"><div style="font-family:var(--font-display); font-weight:700; font-size:16px;">${esc(child.name)}</div><div style="font-size:12.5px; color:var(--ink-soft);">Age ${child.age} · ⭐ ${child.points} points</div></div>
+        <button class="btn btn-ghost btn-sm icon-only" data-action="edit-child" data-id="${child.id}" aria-label="Edit ${esc(child.name)}'s name">✎</button>
       </div>
     </div>` : emptyBlock('🧒', 'Add your first child to get started.')}
     ${child ? `<div class="section-head"><h2>Tasks</h2></div>${rows || emptyBlock('📋', 'No tasks yet.')}
@@ -662,6 +671,12 @@ function modalSettings() {
   return `<div class="modal">
     <h3>⚙️ Settings</h3>
     <form id="form-settings">
+      <div class="field"><label for="parent-a-name">Parent A's name</label>
+        <input type="text" id="parent-a-name" maxlength="20" value="${esc(STATE.parentNames.A)}"></div>
+      <div class="field"><label for="parent-b-name">Parent B's name</label>
+        <input type="text" id="parent-b-name" maxlength="20" value="${esc(STATE.parentNames.B)}">
+        <p class="hint">Shown on the parent switcher and notifications view.</p>
+      </div>
       <div class="field"><label for="openai-key">OpenAI API key (optional)</label>
         <input type="password" id="openai-key" placeholder="sk-..." value="${key ? esc(key) : ''}">
         <p class="hint">Stored only in this browser's local storage and sent directly to OpenAI. Leave blank to use the built-in rule-based suggestions instead.</p>
@@ -702,6 +717,21 @@ function modalAddChild() {
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
         <button type="submit" class="btn btn-grass">Create child</button>
+      </div>
+    </form>
+  </div>`;
+}
+
+function modalEditChild(child) {
+  return `<div class="modal">
+    <h3>Edit ${esc(child.name)}</h3>
+    <form id="form-edit-child">
+      <input type="hidden" id="edit-child-id" value="${child.id}">
+      <div class="field"><label for="edit-child-name">Name</label><input type="text" id="edit-child-name" required maxlength="20" value="${esc(child.name)}"></div>
+      <div class="field"><label for="edit-child-age">Age</label><input type="number" id="edit-child-age" required min="6" max="16" value="${child.age}"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
+        <button type="submit" class="btn btn-grass">Save changes</button>
       </div>
     </form>
   </div>`;
@@ -849,6 +879,7 @@ document.addEventListener('click', async (e) => {
   if (action === 'reset-demo') { if (confirm('Reset all demo data back to the starting sample? This cannot be undone.')) { closeModal(); resetDemo(); } return; }
 
   if (action === 'open-add-child') { openModal(modalAddChild()); return; }
+  if (action === 'edit-child') { openModal(modalEditChild(getChild(target.dataset.id))); return; }
   if (action === 'open-add-task') { openModal(modalTaskForm(target.dataset.child)); wireEmojiPicker('task-emoji-row', 'task-emoji'); wireRecurrencePicker(); return; }
   if (action === 'edit-task') {
     const task = STATE.tasks.find(t => t.id === target.dataset.id);
@@ -926,8 +957,11 @@ document.addEventListener('submit', (e) => {
   if (e.target.id === 'form-settings') {
     e.preventDefault();
     AI.setApiKey(document.getElementById('openai-key').value.trim());
+    setParentName('A', document.getElementById('parent-a-name').value);
+    setParentName('B', document.getElementById('parent-b-name').value);
     showToast('Settings saved.');
     closeModal();
+    render();
     return;
   }
   if (e.target.id === 'form-add-child') {
@@ -946,6 +980,17 @@ document.addEventListener('submit', (e) => {
     location.hash = `#/parent/${currentParentId()}/children/${id}`;
     render();
     showToast(`${name} was added!`);
+    return;
+  }
+  if (e.target.id === 'form-edit-child') {
+    e.preventDefault();
+    const id = document.getElementById('edit-child-id').value;
+    const name = document.getElementById('edit-child-name').value.trim();
+    const age = Number(document.getElementById('edit-child-age').value);
+    if (!name) return;
+    updateChild(id, { name, age });
+    closeModal(); render();
+    showToast('Name updated.');
     return;
   }
   if (e.target.id === 'form-task') {
