@@ -1,0 +1,360 @@
+<title>ChildTaskTracker Demo Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF7E6; --surface:#FFFFFF; --ink:#3A2B1E; --ink-soft:#8A7460;
+    --grass:#4CAE71; --grass-deep:#358A56; --grass-soft:#E4F5EA;
+    --coral:#FF8A5C; --coral-deep:#E96A3B; --coral-soft:#FFE9DE;
+    --sky:#3FA9D6; --sky-deep:#2C86AC; --sky-soft:#E0F0FA;
+    --sun:#FFC53D; --sun-deep:#E2A600; --sun-soft:#FFF3D6;
+    --line:#F0DFC0;
+    --font-display:"Fredoka",ui-rounded,sans-serif;
+    --font-body:"Nunito",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%; margin:0;}
+  body{background:var(--ink); color:var(--ink); font-family:var(--font-body); overflow:hidden;}
+  h1,h2,h3{font-family:var(--font-display); margin:0;}
+  p{margin:0;}
+
+  #deck{position:relative; height:100dvh; width:100%; overflow:hidden;}
+  .slide{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    padding:clamp(20px,4vw,56px) clamp(20px,6vw,88px);
+    opacity:0; pointer-events:none; transform:translateX(24px);
+    transition:opacity .35s ease, transform .35s ease;
+    background:var(--bg); color:var(--ink);
+  }
+  .slide.active{opacity:1; pointer-events:auto; transform:translateX(0);}
+  .slide.alt{background:var(--surface);}
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:clamp(11px,1.1vw,13px); text-transform:uppercase; letter-spacing:.1em;
+    color:var(--coral-deep); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow .n{background:var(--coral-soft); padding:2px 8px; border-radius:100px;}
+
+  .slide-body{flex:1; display:flex; flex-direction:column; justify-content:center; max-width:1100px; margin:0 auto; width:100%;}
+  .slide h2.title{font-size:clamp(28px,4.6vw,52px); font-weight:700; line-height:1.05; text-wrap:balance; margin-bottom:14px;}
+  .slide p.lede{font-size:clamp(15px,1.6vw,19px); color:var(--ink-soft); font-weight:600; max-width:62ch; margin-bottom:8px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:clamp(16px,2.4vw,36px); align-items:start; margin-top:clamp(16px,2.6vw,32px);}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(12px,1.8vw,20px); margin-top:clamp(14px,2.2vw,26px);}
+  @media (max-width:760px){.grid3{grid-template-columns:1fr;}}
+
+  .card{background:var(--surface); border-radius:18px; padding:clamp(16px,2vw,26px); box-shadow:0 5px 0 var(--line); border:2px solid #fff;}
+  .slide.alt .card{background:var(--bg); box-shadow:0 5px 0 var(--line);}
+  .card h3{font-size:clamp(15px,1.5vw,18px); margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .card p{font-size:clamp(13px,1.2vw,14.5px); color:var(--ink-soft); font-weight:600; line-height:1.5;}
+  .card .tag{
+    display:inline-flex; width:34px; height:34px; border-radius:10px; align-items:center; justify-content:center; font-size:16px;
+  }
+
+  .pill-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .pill{font-family:var(--font-mono); font-size:12px; font-weight:600; padding:6px 12px; border-radius:100px; background:var(--sky-soft); color:var(--sky-deep);}
+  .pill.chosen{background:var(--grass); color:#fff;}
+  .pill.muted{background:var(--surface); color:var(--ink-soft); border:1.5px solid var(--line);}
+
+  .stat-row{display:flex; gap:clamp(10px,2vw,20px); margin-top:clamp(14px,2vw,22px); flex-wrap:wrap;}
+  .stat{flex:1; min-width:150px; background:var(--surface); border-radius:16px; padding:16px 18px; box-shadow:0 4px 0 var(--line); border:2px solid #fff;}
+  .slide.alt .stat{background:var(--bg);}
+  .stat .n{font-family:var(--font-display); font-weight:700; font-size:clamp(22px,2.6vw,30px); color:var(--grass-deep);}
+  .stat .l{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);}
+
+  .flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:clamp(16px,2.4vw,28px);}
+  .flow .node{
+    background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:12px 16px;
+    font-family:var(--font-display); font-weight:600; font-size:clamp(12px,1.2vw,14.5px); display:flex; align-items:center; gap:8px;
+  }
+  .slide.alt .flow .node{background:var(--bg);}
+  .flow .arrow{color:var(--coral-deep); font-size:18px; font-weight:700;}
+  .flow .node.accent{border-color:var(--grass); background:var(--grass-soft); color:var(--grass-deep);}
+
+  .arch-row{display:flex; gap:10px; margin-top:clamp(16px,2.4vw,28px); flex-wrap:wrap;}
+  .arch-box{flex:1; min-width:160px; background:var(--surface); border-radius:16px; padding:16px; border:2px solid var(--line);}
+  .slide.alt .arch-box{background:var(--bg);}
+  .arch-box .k{font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:6px;}
+  .arch-box .v{font-family:var(--font-display); font-weight:600; font-size:clamp(13px,1.3vw,15px);}
+  .arch-box.ext{border-color:var(--sky); background:var(--sky-soft);}
+
+  ul.check{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  ul.check li{display:flex; gap:10px; align-items:flex-start; font-size:clamp(13.5px,1.3vw,15.5px); font-weight:600; color:var(--ink);}
+  ul.check li::before{content:"✓"; flex:none; width:22px; height:22px; border-radius:50%; background:var(--grass); color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+
+  .lesson-row{display:flex; gap:12px; align-items:flex-start; margin-top:12px;}
+  .lesson-row .ic{flex:none; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px;}
+  .lesson-row .t{font-family:var(--font-display); font-weight:600; font-size:clamp(13.5px,1.3vw,15.5px); margin-bottom:2px;}
+  .lesson-row .d{font-size:clamp(12px,1.15vw,13.5px); color:var(--ink-soft); font-weight:600;}
+
+  .link-card{display:flex; align-items:center; gap:14px; background:var(--surface); border-radius:16px; padding:14px 18px; border:2px solid var(--line); margin-bottom:10px;}
+  .slide.alt .link-card{background:var(--bg);}
+  .link-card .ic{width:38px; height:38px; border-radius:11px; background:var(--coral-soft); color:var(--coral-deep); display:flex; align-items:center; justify-content:center; font-size:18px; flex:none;}
+  .link-card .t{font-family:var(--font-display); font-weight:600; font-size:14.5px;}
+  .link-card .u{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);}
+
+  .title-slide{align-items:flex-start; justify-content:center;}
+  .title-slide .logo{font-size:clamp(36px,5vw,54px); margin-bottom:6px;}
+  .title-slide h1{font-size:clamp(38px,7vw,84px); font-weight:700; line-height:1; letter-spacing:-.01em;}
+  .title-slide .tag{font-size:clamp(15px,1.8vw,21px); color:var(--ink-soft); font-weight:700; margin-top:12px; max-width:46ch;}
+  .title-slide .meta{margin-top:auto; padding-top:24px; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); display:flex; gap:20px;}
+
+  .end-slide{align-items:center; justify-content:center; text-align:center;}
+  .end-slide h2{font-size:clamp(32px,5.5vw,60px);}
+
+  /* nav chrome */
+  #chrome{position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:14px clamp(18px,4vw,40px); pointer-events:none;}
+  #dots{display:flex; gap:7px; pointer-events:auto; background:rgba(58,43,30,.5); padding:8px 12px; border-radius:100px; backdrop-filter:blur(4px);}
+  #dots button{width:8px; height:8px; border-radius:50%; border:none; background:rgba(255,255,255,.35); cursor:pointer; padding:0;}
+  #dots button.active{background:#fff; width:20px; border-radius:100px;}
+  #counter{font-family:var(--font-mono); font-size:12px; color:#fff; background:rgba(58,43,30,.5); padding:6px 12px; border-radius:100px; pointer-events:auto; backdrop-filter:blur(4px);}
+  .navbtn{
+    position:fixed; top:50%; transform:translateY(-50%); z-index:20; width:44px; height:44px; border-radius:50%;
+    background:rgba(58,43,30,.55); color:#fff; border:none; font-size:18px; cursor:pointer; backdrop-filter:blur(4px);
+  }
+  .navbtn:hover{background:rgba(58,43,30,.8);}
+  #prevBtn{left:14px;} #nextBtn{right:14px;}
+  @media (max-width:600px){.navbtn{width:36px; height:36px;} #counter{display:none;}}
+
+  @media print{
+    @page{ size:landscape; margin:0; }
+    html,body{height:auto; overflow:visible; background:var(--bg);}
+    #chrome,.navbtn{display:none !important;}
+    #deck{position:static; height:auto; overflow:visible;}
+    .slide{
+      position:static !important; opacity:1 !important; transform:none !important; pointer-events:auto !important;
+      width:100vw; height:100vh; page-break-after:always; break-after:page;
+      display:flex !important;
+    }
+    .slide:last-child{page-break-after:auto; break-after:auto;}
+  }
+</style>
+
+<div id="deck">
+
+  <section class="slide title-slide active">
+    <div class="slide-body" style="justify-content:flex-start; padding-top:6vh;">
+      <div class="logo">🦉</div>
+      <h1>ChildTaskTracker</h1>
+      <p class="tag">Turning household chores into a habit kids actually want to keep — and parents can trust.</p>
+      <div class="meta">
+        <span>MVP DEMO</span>
+        <span>2026-09-16</span>
+        <span>childtasktracker.github.io</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide alt">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">01</span> The problem</div>
+      <h2 class="title">Sticker charts don't scale to two parents and a wide age range.</h2>
+      <p class="lede">Most families track chores with a whiteboard or an app that stops working the moment a second parent, a teenager, or a real reward system gets involved.</p>
+      <div class="grid3">
+        <div class="card"><span class="tag" style="background:var(--coral-soft); color:var(--coral-deep);">👀</span><h3>No shared visibility</h3><p>One parent logs it, the other is out of the loop — no easy way for both to see and approve.</p></div>
+        <div class="card"><span class="tag" style="background:var(--sky-soft); color:var(--sky-deep);">🎂</span><h3>One-size-fits-all</h3><p>The same sticker chart doesn't motivate a 7-year-old and a 15-year-old equally.</p></div>
+        <div class="card"><span class="tag" style="background:var(--sun-soft); color:var(--sun-deep);">🎁</span><h3>Rewards feel arbitrary</h3><p>No system connecting effort to reward — it's negotiated fresh, every single time.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">02</span> The solution</div>
+      <h2 class="title">One loop: a kid marks it done, a parent confirms it, points do the rest.</h2>
+      <p class="lede">ChildTaskTracker turns chores into a shared, validated, rewarding routine — without becoming another thing parents have to administer by hand.</p>
+      <div class="flow">
+        <div class="node">🧒 Child marks task done</div>
+        <span class="arrow">→</span>
+        <div class="node">🔔 Both parents notified</div>
+        <span class="arrow">→</span>
+        <div class="node">✅ Parent validates</div>
+        <span class="arrow">→</span>
+        <div class="node accent">⭐ Points → reward</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide alt">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">03</span> From the PRD</div>
+      <h2 class="title">Scoped deliberately: one family, real validation, AI as a helper — never the decision-maker.</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>👨‍👩‍👧 Who it's for</h3>
+          <ul class="check">
+            <li>Co-parents sharing validation duties</li>
+            <li>Kids ages 6–16, with age-adaptive tone</li>
+            <li>Single-family tool first — built to generalize later</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🛡️ Non-negotiables</h3>
+          <ul class="check">
+            <li>AI recommends only from the parent's own reward list</li>
+            <li>Every AI feature has a deterministic fallback</li>
+            <li>24h auto-approval, one-day streak forgiveness</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">04</span> Design exploration</div>
+      <h2 class="title">Three directions, prototyped as real landing pages — then one clear pick.</h2>
+      <div class="grid3">
+        <div class="card"><span class="tag" style="background:var(--sky-soft); color:var(--sky-deep);">🌿</span><h3>A · Calm &amp; minimal</h3><p>Faint pastel washes, quiet confidence, no gamification chrome.</p></div>
+        <div class="card" style="border-color:var(--grass); box-shadow:0 5px 0 var(--grass-deep);"><span class="tag" style="background:var(--grass-soft); color:var(--grass-deep);">🦉</span><h3>B · Warm &amp; playful <span style="color:var(--grass-deep);">✓ chosen</span></h3><p>Duolingo-style energy — bright, bold, mascot-led. Best fit for ages 6–16.</p></div>
+        <div class="card"><span class="tag" style="background:var(--coral-soft); color:var(--coral-deep);">🌸</span><h3>C · Lively &amp; animated</h3><p>Garden-path metaphor with confetti and motion — maximalist, high build cost.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide alt">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">05</span> The MVP</div>
+      <h2 class="title">A fully working demo — not a mockup. Every flow below actually runs.</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>🧒 Child side</h3>
+          <ul class="check">
+            <li>Tasks tab — tap to mark done, confetti on completion</li>
+            <li>Rewards shelf — redeem once points reach the threshold</li>
+            <li>Progress — streak, points, AI weekly recap</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>👤 Parent side</h3>
+          <ul class="check">
+            <li>Validate queue — approve/reject, live 24h countdown</li>
+            <li>Manage children, tasks, rewards, and names</li>
+            <li>Insights — AI reward suggestion + KPI summary</li>
+          </ul>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="n">0</div><div class="l">Backend servers</div></div>
+        <div class="stat"><div class="n">4</div><div class="l">Files, total</div></div>
+        <div class="stat"><div class="n">100%</div><div class="l">Functional offline / no key</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">06</span> Architecture</div>
+      <h2 class="title">Everything lives in the browser. One optional call ever leaves it.</h2>
+      <div class="arch-row">
+        <div class="arch-box"><div class="k">Hosting</div><div class="v">GitHub Pages, static files</div></div>
+        <div class="arch-box"><div class="k">State</div><div class="v">One JS object + localStorage</div></div>
+        <div class="arch-box"><div class="k">UI</div><div class="v">Vanilla JS, hash router, no build step</div></div>
+        <div class="arch-box ext"><div class="k">Optional</div><div class="v">Direct OpenAI call, key stays local</div></div>
+      </div>
+      <p class="lede" style="margin-top:22px;">Every AI feature — reward suggestions, weekly recaps, starter tasks — has a rule-based fallback. No key, no network, no problem: the app behaves identically either way.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">07</span> How it works, taught</div>
+      <h2 class="title">A 6-module interactive course, built from this app's own real code.</h2>
+      <p class="lede">Not slides about the code — the actual functions, the actual bugs, walked through with live quizzes and animations. No coding background required.</p>
+      <div class="grid3">
+        <div class="card"><span class="tag" style="background:var(--coral-soft); color:var(--coral-deep);">👆</span><h3>1 · What Happens When You Tap</h3><p>One click traced end-to-end, into a group-chat animation of both parents getting notified.</p></div>
+        <div class="card"><span class="tag" style="background:var(--sky-soft); color:var(--sky-deep);">🎭</span><h3>2 · Meet the Cast</h3><p>The four files and the one shared STATE object everything reads and writes.</p></div>
+        <div class="card"><span class="tag" style="background:var(--sun-soft); color:var(--sun-deep);">🔁</span><h3>3 · The Loop</h3><p>Click → mutation → state → localStorage/render — the same five steps, every time, animated.</p></div>
+        <div class="card"><span class="tag" style="background:var(--grass-soft); color:var(--grass-deep);">☎️</span><h3>4 · Calling In Outside Help</h3><p>The one call that leaves the browser, and the guardrail that keeps the AI on a leash.</p></div>
+        <div class="card"><span class="tag" style="background:var(--coral-soft); color:var(--coral-deep);">🕰️</span><h3>5 · The Clever Tricks</h3><p>A fast-forwardable demo clock and the one-day streak-forgiveness algorithm, in real code.</p></div>
+        <div class="card"><span class="tag" style="background:var(--sky-soft); color:var(--sky-deep);">🐛</span><h3>6 · When It Broke</h3><p>Two real bugs from this project, turned into a "spot the bug" challenge and a debugging scenario.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide alt">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">08</span> Key takeaways</div>
+      <h2 class="title">What building this actually taught us.</h2>
+      <div class="lesson-row"><span class="ic" style="background:var(--coral-soft); color:var(--coral-deep);">🐛</span><div><div class="t">One line broke every modal button</div><div class="d">An event.stopPropagation() silently killed every Save/Send button — caught only by live-clicking the deployed app, not by reading the code.</div></div></div>
+      <div class="lesson-row"><span class="ic" style="background:var(--sky-soft); color:var(--sky-deep);">📡</span><div><div class="t">CDNs hide your own fixes</div><div class="d">GitHub Pages' edge cache kept serving old JS after a push — versioned URLs (app.js?v=4) made re-verification trustworthy.</div></div></div>
+      <div class="lesson-row"><span class="ic" style="background:var(--grass-soft); color:var(--grass-deep);">🛟</span><div><div class="t">Fallback-first beats AI-only</div><div class="d">Every AI feature ships a rule-based twin — doubles the code, but the product never breaks when a key is missing or the API is down.</div></div></div>
+      <div class="lesson-row"><span class="ic" style="background:var(--sun-soft); color:var(--sun-deep);">⚖️</span><div><div class="t">The real tradeoff: no backend, no sync</div><div class="d">Zero infrastructure was the right call for an MVP demo — but it means no real cross-device sync until a backend is added.</div></div></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-body">
+      <div class="eyebrow"><span class="n">09</span> See it live</div>
+      <h2 class="title">Everything from this deck, one tap away.</h2>
+      <div class="link-card"><span class="ic">🚀</span><div><div class="t">Live app</div><div class="u">adamhelwa.github.io/ChildTaskTracker</div></div></div>
+      <div class="link-card"><span class="ic">🧑‍💻</span><div><div class="t">Source + PRD + roadmap + architecture</div><div class="u">github.com/adamhelwa/ChildTaskTracker</div></div></div>
+      <div class="link-card"><span class="ic">🎓</span><div><div class="t">Interactive "How It Works" course</div><div class="u">adamhelwa.github.io/ChildTaskTracker/course</div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt end-slide">
+    <div class="slide-body" style="align-items:center;">
+      <div class="logo" style="font-size:48px;">🦉</div>
+      <h2>Let's see it in action.</h2>
+      <p class="lede" style="margin:0 auto;">Questions welcome — and yes, you can tap the real buttons.</p>
+    </div>
+  </section>
+
+</div>
+
+<div id="chrome">
+  <span id="counter">1 / 11</span>
+  <div id="dots"></div>
+  <span style="width:1px;"></span>
+</div>
+<button id="prevBtn" class="navbtn" aria-label="Previous slide">‹</button>
+<button id="nextBtn" class="navbtn" aria-label="Next slide">›</button>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotsEl = document.getElementById('dots');
+  var counterEl = document.getElementById('counter');
+  var i = 0;
+
+  slides.forEach(function(_, idx){
+    var b = document.createElement('button');
+    b.setAttribute('aria-label', 'Go to slide ' + (idx + 1));
+    b.addEventListener('click', function(){ go(idx); });
+    dotsEl.appendChild(b);
+  });
+  var dots = Array.prototype.slice.call(dotsEl.children);
+
+  function go(n){
+    if (n < 0 || n >= slides.length) return;
+    slides[i].classList.remove('active');
+    i = n;
+    slides[i].classList.add('active');
+    dots.forEach(function(d, idx){ d.classList.toggle('active', idx === i); });
+    counterEl.textContent = (i + 1) + ' / ' + slides.length;
+  }
+  go(0);
+
+  document.getElementById('nextBtn').addEventListener('click', function(){ go(i + 1); });
+  document.getElementById('prevBtn').addEventListener('click', function(){ go(i - 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ') { go(i + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { go(i - 1); e.preventDefault(); }
+  });
+
+  var touchStartX = null;
+  document.addEventListener('touchstart', function(e){ touchStartX = e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if (touchStartX === null) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx > 50) go(i - 1);
+    if (dx < -50) go(i + 1);
+    touchStartX = null;
+  }, {passive:true});
+})();
+</script>
