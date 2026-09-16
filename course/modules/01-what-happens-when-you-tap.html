@@ -1,0 +1,141 @@
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Happens When You Tap</h1>
+      <p class="module-subtitle">ChildTaskTracker in one sentence, then one tap traced all the way down.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The app, in plain terms</h2>
+        <p>ChildTaskTracker is a chore-and-rewards app for families. A kid marks chores done, a parent approves them, and points build toward rewards the parent already agreed to.</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">✅</div>
+            <div><strong>Tasks</strong><p>The kid's daily to-do list — tap to mark something done.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎁</div>
+            <div><strong>Rewards</strong><p>A shelf of parent-set prizes, priced in points.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📈</div>
+            <div><strong>Progress</strong><p>Streaks, points, and a plain-English weekly recap.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Imagine you're the kid</h2>
+        <p>It's morning. You brushed your teeth. You open the app and tap the little circle next to <strong>"Brush teeth."</strong> That single tap is the doorbell of this whole system — everything else in this course is what happens after someone rings it.</p>
+        <p>In programming, that tap is called an
+          <span class="term" data-definition="An event is something that happens — a click, a key press, a page loading — that code can 'listen' for and react to. It's the trigger that kicks off everything else.">event</span>.
+          Somewhere in the code, something is sitting and listening for exactly this doorbell.
+        </p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Here's the listener, catching your tap</h2>
+        <p>Every button in the app is tagged with a label like <code>data-action="complete-task"</code>. One single piece of code listens for clicks anywhere on the page and checks that label to decide what to do — instead of writing a separate listener for every single button.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">document</span>.<span class="code-function">addEventListener</span>(<span class="code-string">'click'</span>, <span class="code-keyword">async</span> (e) => {</span>
+<span class="code-line">  <span class="code-keyword">const</span> target = e.target.<span class="code-function">closest</span>(<span class="code-string">'[data-action]'</span>);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!target) <span class="code-keyword">return</span>;</span>
+<span class="code-line">  <span class="code-keyword">const</span> action = target.dataset.action;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (action === <span class="code-string">'complete-task'</span>) { spawnConfetti(...); markTaskDone(target.dataset.task); <span class="code-keyword">return</span>; }</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Listen for <em>any</em> click, anywhere on the whole page.</p>
+              <p class="tl">Walk up from wherever was clicked until we find something tagged with a job to do.</p>
+              <p class="tl">If nothing nearby has a job, ignore the click entirely.</p>
+              <p class="tl">Read the job's name off the tag.</p>
+              <p class="tl">If the job is "mark a task complete," celebrate and run <code>markTaskDone()</code>.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key insight</strong>
+            <p>This pattern is called <span class="term" data-definition="Event delegation means putting one listener on a parent element instead of a separate listener on every child button — clicks 'bubble up' to the parent, which figures out what was actually clicked.">event delegation</span>. One listener handles every button in the app — add a hundred new buttons tomorrow and this code doesn't change.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Your tap sets off a group chat</h2>
+        <p>Marking a task done doesn't just check a box — it quietly notifies <em>both</em> parents, so neither one is left out of the loop. Press play below.</p>
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="kid" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🦊</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Emma (kid view)</span>
+                <p>taps ✓ on "Brush teeth"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="app" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">⚙️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">markTaskDone()</span>
+                <p>status set to "pending" · notifyParents() called</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="parentA" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🔔</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Parent A's notifications</span>
+                <p>"Emma marked 'Brush teeth' done"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="parentB" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔔</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Parent B's notifications</span>
+                <p>"Emma marked 'Brush teeth' done"</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+        <p>Notice: <strong>one</strong> notification event fans out to <strong>both</strong> parents. Same data, two recipients — you'll see exactly how in Module 3.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly — markTaskDone() is the function that already does 'find the task, change its status, tell both parents.' A new feature that fits that same shape should start from the function that already solves the closest problem, not from scratch."
+               data-explanation-wrong="Not quite. Think about which existing function already does something very close to 'a kid does a thing, and both parents get told about it.'">
+            <h3 class="quiz-question">You want to add a "Snap a photo of your homework" feature that should notify both parents, just like brushing teeth does. Which function would you start by reading?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>renderPicker() — it builds the profile-selection screen</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>markTaskDone() — it already turns "a kid did something" into "both parents get notified"</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>esc() — it escapes text before it's shown on screen</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

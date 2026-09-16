@@ -1,0 +1,127 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Calling In Outside Help</h1>
+      <p class="module-subtitle">The one place this app leaves the browser — and what happens if that call doesn't answer.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One phone line to the outside world</h2>
+        <p>Everything you've seen so far — every list, every point, every approval — happens entirely inside your browser. There's exactly one thing that ever leaves it: an optional call to OpenAI, for features like "suggest a reward" or "write my weekly recap."</p>
+        <p>Think of it like a small shop with one landline that only rings out to a single specialist — everything else the shop handles itself, in-house.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The call itself</h2>
+        <p>No backend server sits between the browser and OpenAI. The browser dials directly, using a
+          <span class="term" data-definition="An API key is a private password-like string that proves to a service like OpenAI who's asking, and lets them bill the right account for the usage.">key</span>
+          the parent typed into Settings.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — ai.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">chat</span>(messages, { maxTokens = <span class="code-number">300</span> } = {}) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> key = <span class="code-function">getApiKey</span>();</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!key) <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'no-key'</span>);</span>
+<span class="code-line">  <span class="code-keyword">const</span> res = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">'https://api.openai.com/v1/chat/completions'</span>, {</span>
+<span class="code-line">    <span class="code-property">method</span>: <span class="code-string">'POST'</span>,</span>
+<span class="code-line">    <span class="code-property">headers</span>: {</span>
+<span class="code-line">      <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span>,</span>
+<span class="code-line">      <span class="code-string">'Authorization'</span>: <span class="code-string">`Bearer ${key}`</span>,</span>
+<span class="code-line">    },</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This function's whole job: send a conversation to OpenAI and get a reply.</p>
+              <p class="tl">Look for a key saved earlier in this browser.</p>
+              <p class="tl">No key? Stop immediately — don't even try the call.</p>
+              <p class="tl">Otherwise, send a request straight to OpenAI's servers...</p>
+              <p class="tl">...as a POST, meaning "here's data," not "give me a page."</p>
+              <p class="tl">Say the data is JSON...</p>
+              <p class="tl">...and prove who's asking by attaching the key.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Trace the decision</h2>
+        <p>Every AI-assisted button follows the same fork. Step through it.</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-4-1","label":"Parent taps Suggest a Reward"},
+          {"highlight":"flow-actor-4-2","label":"Is a key saved, and does the call succeed?","packet":true,"from":"actor-4-1","to":"actor-4-2"},
+          {"highlight":"flow-actor-4-3","label":"Yes: fetch() asks OpenAI directly, from the browser","packet":true,"from":"actor-4-2","to":"actor-4-3"},
+          {"highlight":"flow-actor-4-4","label":"No key, network error, or rate limit: run the built-in rule-based logic instead","packet":true,"from":"actor-4-2","to":"actor-4-4"},
+          {"highlight":"flow-actor-4-5","label":"Either path lands on the exact same result shape — the screen never knows which one ran","packet":true,"from":"actor-4-3","to":"actor-4-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-4-1"><div class="flow-actor-icon">👆</div><span>Tap</span></div>
+            <div class="flow-actor" id="flow-actor-4-2"><div class="flow-actor-icon">❓</div><span>Key ok?</span></div>
+            <div class="flow-actor" id="flow-actor-4-3"><div class="flow-actor-icon">🤖</div><span>OpenAI</span></div>
+            <div class="flow-actor" id="flow-actor-4-4"><div class="flow-actor-icon">📐</div><span>Fallback logic</span></div>
+            <div class="flow-actor" id="flow-actor-4-5"><div class="flow-actor-icon">🖼️</div><span>Same result</span></div>
+          </div>
+          <div class="flow-packet" id="flow-packet-4"></div>
+          <div class="flow-step-label" id="flow-label-4">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The AI doesn't get to invent a reward</h2>
+        <p>The instructions sent to OpenAI don't just ask for a suggestion — they force it to pick from the parent's own list. Look closely at the very first sentence of the instructions below.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — ai.js</span>
+            <pre><code><span class="code-line">{ <span class="code-property">role</span>: <span class="code-string">'system'</span>, <span class="code-property">content</span>: <span class="code-string">'You recommend a reward for a child from a</span></span>
+<span class="code-line"><span class="code-string">  PARENT-APPROVED list only. You must pick the "id" of exactly</span></span>
+<span class="code-line"><span class="code-string">  one item from the provided catalog — never invent a new reward,</span></span>
+<span class="code-line"><span class="code-string">  amount, or category. Reply with ONLY JSON: {"rewardId": "...",</span></span>
+<span class="code-line"><span class="code-string">  "reason": "...", "suggestedFrequency": "..."}.'</span> },</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This is a
+                <span class="term" data-definition="A system prompt is a hidden instruction sent before the user's actual message that sets the AI's rules and role for the whole conversation — the user never sees it.">system prompt</span>
+                — the AI's rulebook for this one task.
+              </p>
+              <p class="tl">The very first sentence is a hard boundary: only rewards the parent already added.</p>
+              <p class="tl">Spelled out again, explicitly, so there's no ambiguity: no inventing anything.</p>
+              <p class="tl">And it must answer in a strict, predictable data format the code can trust.</p>
+            </div>
+          </div>
+        </div>
+        <p>Even if the answer comes back malformed, the code double-checks: <code>const match = active.find(r =&gt; r.id === parsed.rewardId); if (!match) throw new Error(...)</code> — an AI reply that names a reward that doesn't exist gets rejected and falls through to the same rule-based fallback as a network error.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right. Because there's no backend to route through, the browser calls OpenAI directly — meaning something has to hold the key. Storing it only in that one browser's localStorage, never in a file the app ships, keeps it off the public repo entirely."
+               data-explanation-wrong="Think about it from the other direction: this app has no backend server. If the key isn't on a server and isn't in the repo, where's the only place left for it to live?">
+            <h3 class="quiz-question">Why does ChildTaskTracker ask each parent to paste in their own OpenAI key, instead of shipping one key with the app?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>OpenAI requires a different key per user by law</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>A key shipped in the code would be sitting in the public GitHub repo for anyone to copy and spend on their own bill</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It makes the AI responses more accurate</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

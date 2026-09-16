@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How ChildTaskTracker Works</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">How ChildTaskTracker Works</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="What Happens When You Tap" role="tab" aria-label="Module 1: What Happens When You Tap"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="Meet the Cast" role="tab" aria-label="Module 2: Meet the Cast"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="The Loop" role="tab" aria-label="Module 3: The Loop"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="Calling In Outside Help" role="tab" aria-label="Module 4: Calling In Outside Help"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="The Clever Tricks" role="tab" aria-label="Module 5: The Clever Tricks"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="When It Broke" role="tab" aria-label="Module 6: When It Broke"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Happens When You Tap</h1>
+      <p class="module-subtitle">ChildTaskTracker in one sentence, then one tap traced all the way down.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The app, in plain terms</h2>
+        <p>ChildTaskTracker is a chore-and-rewards app for families. A kid marks chores done, a parent approves them, and points build toward rewards the parent already agreed to.</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">✅</div>
+            <div><strong>Tasks</strong><p>The kid's daily to-do list — tap to mark something done.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎁</div>
+            <div><strong>Rewards</strong><p>A shelf of parent-set prizes, priced in points.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📈</div>
+            <div><strong>Progress</strong><p>Streaks, points, and a plain-English weekly recap.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Imagine you're the kid</h2>
+        <p>It's morning. You brushed your teeth. You open the app and tap the little circle next to <strong>"Brush teeth."</strong> That single tap is the doorbell of this whole system — everything else in this course is what happens after someone rings it.</p>
+        <p>In programming, that tap is called an
+          <span class="term" data-definition="An event is something that happens — a click, a key press, a page loading — that code can 'listen' for and react to. It's the trigger that kicks off everything else.">event</span>.
+          Somewhere in the code, something is sitting and listening for exactly this doorbell.
+        </p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Here's the listener, catching your tap</h2>
+        <p>Every button in the app is tagged with a label like <code>data-action="complete-task"</code>. One single piece of code listens for clicks anywhere on the page and checks that label to decide what to do — instead of writing a separate listener for every single button.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">document</span>.<span class="code-function">addEventListener</span>(<span class="code-string">'click'</span>, <span class="code-keyword">async</span> (e) => {</span>
+<span class="code-line">  <span class="code-keyword">const</span> target = e.target.<span class="code-function">closest</span>(<span class="code-string">'[data-action]'</span>);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!target) <span class="code-keyword">return</span>;</span>
+<span class="code-line">  <span class="code-keyword">const</span> action = target.dataset.action;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (action === <span class="code-string">'complete-task'</span>) { spawnConfetti(...); markTaskDone(target.dataset.task); <span class="code-keyword">return</span>; }</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Listen for <em>any</em> click, anywhere on the whole page.</p>
+              <p class="tl">Walk up from wherever was clicked until we find something tagged with a job to do.</p>
+              <p class="tl">If nothing nearby has a job, ignore the click entirely.</p>
+              <p class="tl">Read the job's name off the tag.</p>
+              <p class="tl">If the job is "mark a task complete," celebrate and run <code>markTaskDone()</code>.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key insight</strong>
+            <p>This pattern is called <span class="term" data-definition="Event delegation means putting one listener on a parent element instead of a separate listener on every child button — clicks 'bubble up' to the parent, which figures out what was actually clicked.">event delegation</span>. One listener handles every button in the app — add a hundred new buttons tomorrow and this code doesn't change.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Your tap sets off a group chat</h2>
+        <p>Marking a task done doesn't just check a box — it quietly notifies <em>both</em> parents, so neither one is left out of the loop. Press play below.</p>
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="kid" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🦊</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Emma (kid view)</span>
+                <p>taps ✓ on "Brush teeth"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="app" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">⚙️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">markTaskDone()</span>
+                <p>status set to "pending" · notifyParents() called</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="parentA" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🔔</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Parent A's notifications</span>
+                <p>"Emma marked 'Brush teeth' done"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="parentB" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔔</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Parent B's notifications</span>
+                <p>"Emma marked 'Brush teeth' done"</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+        <p>Notice: <strong>one</strong> notification event fans out to <strong>both</strong> parents. Same data, two recipients — you'll see exactly how in Module 3.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly — markTaskDone() is the function that already does 'find the task, change its status, tell both parents.' A new feature that fits that same shape should start from the function that already solves the closest problem, not from scratch."
+               data-explanation-wrong="Not quite. Think about which existing function already does something very close to 'a kid does a thing, and both parents get told about it.'">
+            <h3 class="quiz-question">You want to add a "Snap a photo of your homework" feature that should notify both parents, just like brushing teeth does. Which function would you start by reading?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>renderPicker() — it builds the profile-selection screen</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>markTaskDone() — it already turns "a kid did something" into "both parents get notified"</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>esc() — it escapes text before it's shown on screen</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Cast</h1>
+      <p class="module-subtitle">Four files play four very different roles — like the crew behind a small play.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Four files, four jobs</h2>
+        <p>Think of the app like a small play. One file is the stage. One is the costumes. One is the cast and script, doing all the acting. One is a guest consultant who only shows up when specifically called.</p>
+        <div class="file-tree">
+          <div class="ft-file"><span class="ft-name">index.html</span><span class="ft-desc">The stage — an empty shell the other files fill in</span></div>
+          <div class="ft-file"><span class="ft-name">styles.css</span><span class="ft-desc">The costumes and set design — every color, shape, spacing rule</span></div>
+          <div class="ft-file"><span class="ft-name">app.js</span><span class="ft-desc">The cast and script — state, rendering, every button's behavior</span></div>
+          <div class="ft-file"><span class="ft-name">ai.js</span><span class="ft-desc">A guest consultant — called in only for AI suggestions, with a stand-in ready if they don't show</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The script everyone reads from</h2>
+        <p>Nearly every actor in <code>app.js</code> reads from and writes to one shared object called <code>STATE</code>. It's the single source of truth — every child, task, and point balance lives here, and nowhere else.</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)"><div class="pattern-icon" style="background: var(--color-actor-1)">🧒</div><h4 class="pattern-title">children</h4><p class="pattern-desc">Name, age, avatar, current points — one entry per kid.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)"><div class="pattern-icon" style="background: var(--color-actor-2)">✅</div><h4 class="pattern-title">tasks &amp; completions</h4><p class="pattern-desc">What's assigned, and every time it was marked done, approved, or rejected.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)"><div class="pattern-icon" style="background: var(--color-actor-3)">🎁</div><h4 class="pattern-title">rewards &amp; redemptions</h4><p class="pattern-desc">The prize catalog, and every request to cash points in.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)"><div class="pattern-icon" style="background: var(--color-actor-4)">📒</div><h4 class="pattern-title">pointsLedger &amp; notifications</h4><p class="pattern-desc">Every point earned or spent, and every alert sent to a parent.</p></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where STATE actually starts</h2>
+        <p>The very first lines of the app build this object. Nothing fancy — just a plain JavaScript object with empty lists waiting to be filled in.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">const</span> state = {</span>
+<span class="code-line">  clock: { simulatedNowMs: now, simulatedDate: today },</span>
+<span class="code-line">  parentNames: { A: <span class="code-string">'Parent A'</span>, B: <span class="code-string">'Parent B'</span> },</span>
+<span class="code-line">  children: [], tasks: [], completions: [], rewards: [], redemptions: [], pointsLedger: [], notifications: [],</span>
+<span class="code-line">};</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start building the app's one and only object.</p>
+              <p class="tl">Remember what "today" is — more on this trick in Module 5.</p>
+              <p class="tl">Give each parent a default display name, which Settings can change later.</p>
+              <p class="tl">Seven empty lists, each one ready to hold a different kind of record.</p>
+            </div>
+          </div>
+        </div>
+        <p>Every list here is a
+          <span class="term" data-definition="An array is an ordered list of items in code — like a numbered list, but the computer can add, remove, search, and loop through it instantly.">array</span>
+          — an ordered list the app can search, filter, and add to.
+        </p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Who's allowed to change the script</h2>
+        <p>Reading <code>STATE</code> happens everywhere, but <em>changing</em> it only happens through a small set of named functions — never by reaching in and editing it directly from just anywhere.</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">✏️</div>
+            <div><strong>Mutation functions</strong><p><code>markTaskDone()</code>, <code>approveCompletion()</code>, <code>addLedger()</code> — the only code allowed to change <code>STATE</code>.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🖼️</div>
+            <div><strong>render()</strong><p>Reads <code>STATE</code> and rebuilds the on-screen HTML — never changes anything itself.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">💾</div>
+            <div><strong>saveState() / loadState()</strong><p>The only two functions that touch the browser's long-term storage.</p></div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Good to know</strong>
+            <p>Keeping "things that change data" and "things that display data" separate is a core software idea. It means you always know exactly where to look when something's wrong: is the <em>data</em> wrong, or is the <em>display</em> of it wrong?</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Right — a parent's points don't move until addLedger() runs, and addLedger() is only ever called from approveCompletion() and approveRedemption(). If points aren't updating, that's exactly where to look first."
+               data-explanation-wrong="Not quite. Remember: only mutation functions are allowed to change STATE. Which one is responsible for adding points?">
+            <h3 class="quiz-question">A parent approves a task, but the child's points don't go up. Which function would you check first?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>addLedger() — the only function that changes a child's points balance</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>renderChildTasks() — it displays the task list</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>styles.css — it controls what the points number looks like</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">The Loop</h1>
+      <p class="module-subtitle">Every single interaction in this app follows the exact same five-step loop.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Trace it yourself</h2>
+        <p>Click through the steps below. This is <em>the</em> loop — the same five steps run whether you're marking a task, approving it, redeeming a reward, or renaming a child.</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"You tap the check button"},
+          {"highlight":"flow-actor-2","label":"markTaskDone() runs — the only code allowed to touch this data","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"STATE is updated in memory — right now, this is the only copy that exists","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"saveState() writes the whole thing to localStorage, so it survives closing the tab","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"render() rebuilds the entire screen from STATE, from scratch","packet":true,"from":"actor-3","to":"actor-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1"><div class="flow-actor-icon">👆</div><span>UI event</span></div>
+            <div class="flow-actor" id="flow-actor-2"><div class="flow-actor-icon">✏️</div><span>Mutation fn</span></div>
+            <div class="flow-actor" id="flow-actor-3"><div class="flow-actor-icon">🧠</div><span>STATE</span></div>
+            <div class="flow-actor" id="flow-actor-4"><div class="flow-actor-icon">💾</div><span>localStorage</span></div>
+            <div class="flow-actor" id="flow-actor-5"><div class="flow-actor-icon">🖼️</div><span>Screen</span></div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One router decides what you see</h2>
+        <p>A single function reads the web address (everything after the <code>#</code>) and decides which screen to build. Change the address, and this function picks a different path.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">render</span>() {</span>
+<span class="code-line">  checkAutoApprovals();</span>
+<span class="code-line">  <span class="code-keyword">const</span> parts = parseRoute();</span>
+<span class="code-line">  <span class="code-keyword">const</span> app = document.<span class="code-function">getElementById</span>(<span class="code-string">'app'</span>);</span>
+<span class="code-line">  <span class="code-keyword">let</span> html;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (parts[0] === <span class="code-string">'child'</span> && parts[1]) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> child = <span class="code-function">getChild</span>(parts[1]);</span>
+<span class="code-line">    <span class="code-comment">// ...decide which of the child's three tabs to build</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">First, quietly check if any pending tasks have waited 24 hours and should auto-approve.</p>
+              <p class="tl">Break the web address into pieces, like splitting "child/emma/tasks" into a list.</p>
+              <p class="tl">Grab the one spot on the page everything gets drawn into.</p>
+              <p class="tl">We haven't decided what to draw yet.</p>
+              <p class="tl">If the address starts with "child" and names one...</p>
+              <p class="tl">...look up that specific child...</p>
+              <p class="tl">...and figure out which of their three tabs to show.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The whiteboard, wiped and redrawn</h2>
+        <p><code>render()</code> doesn't figure out what changed and tweak just that piece. It throws away the <em>entire</em> screen and rebuilds it from <code>STATE</code>, every single time — like a whiteboard that gets wiped clean and redrawn from memory after every edit, rather than erasing just one word.</p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key insight</strong>
+            <p>Frameworks like React exist specifically to avoid this — they compare old and new versions and only touch what changed, called
+              <span class="term" data-definition="Diffing means comparing the old version of something to the new version and only updating the parts that actually changed — instead of throwing everything away and starting over.">diffing</span>.
+              This app skips that entirely: no framework, no build step, just a template rebuilt from scratch. Slower in theory, invisible in practice at this scale, and radically simpler to reason about.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The notebook that survives closing the tab</h2>
+        <p>Browsers give every website a small private notebook called
+          <span class="term" data-definition="localStorage is a small storage space every website gets in your browser. Data saved there sticks around even after you close the tab or restart your computer — until you or the site clears it.">localStorage</span>.
+          Close the two functions that are the app's only connection to it:</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">loadState</span>() {</span>
+<span class="code-line">  <span class="code-keyword">try</span> {</span>
+<span class="code-line">    <span class="code-keyword">const</span> raw = localStorage.<span class="code-function">getItem</span>(STORAGE_KEY);</span>
+<span class="code-line">    <span class="code-keyword">return</span> raw ? JSON.<span class="code-function">parse</span>(raw) : <span class="code-keyword">null</span>;</span>
+<span class="code-line">  } <span class="code-keyword">catch</span> { <span class="code-keyword">return</span> <span class="code-keyword">null</span>; }</span>
+<span class="code-line">}</span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">saveState</span>() {</span>
+<span class="code-line">  <span class="code-keyword">try</span> { localStorage.<span class="code-function">setItem</span>(STORAGE_KEY, JSON.<span class="code-function">stringify</span>(STATE)); } <span class="code-keyword">catch</span> {}</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">On startup, try to read whatever was saved before.</p>
+              <p class="tl">Turn the saved text back into a real JavaScript object — localStorage can only hold text.</p>
+              <p class="tl">If nothing's saved yet, say so honestly instead of crashing.</p>
+              <p class="tl">Every time STATE changes...</p>
+              <p class="tl">...turn the whole thing into text and save it — quietly failing instead of crashing if storage is full or blocked.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. localStorage is scoped per browser — a parent's phone and a child's tablet each have their own separate notebook. To sync them, something would need to live outside any single browser and both devices would talk to it: a real backend."
+               data-explanation-wrong="Not quite — think about where STATE actually lives right now, and whether two different devices could ever see the same localStorage.">
+            <h3 class="quiz-question">A parent wants their phone and their kid's tablet to show the exact same live data. Based on where STATE lives today, what's missing?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Nothing — localStorage already syncs across devices automatically</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>A faster render() function</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Some shared server both devices talk to — localStorage never leaves the one browser it's saved in</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Calling In Outside Help</h1>
+      <p class="module-subtitle">The one place this app leaves the browser — and what happens if that call doesn't answer.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One phone line to the outside world</h2>
+        <p>Everything you've seen so far — every list, every point, every approval — happens entirely inside your browser. There's exactly one thing that ever leaves it: an optional call to OpenAI, for features like "suggest a reward" or "write my weekly recap."</p>
+        <p>Think of it like a small shop with one landline that only rings out to a single specialist — everything else the shop handles itself, in-house.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The call itself</h2>
+        <p>No backend server sits between the browser and OpenAI. The browser dials directly, using a
+          <span class="term" data-definition="An API key is a private password-like string that proves to a service like OpenAI who's asking, and lets them bill the right account for the usage.">key</span>
+          the parent typed into Settings.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — ai.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">chat</span>(messages, { maxTokens = <span class="code-number">300</span> } = {}) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> key = <span class="code-function">getApiKey</span>();</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!key) <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'no-key'</span>);</span>
+<span class="code-line">  <span class="code-keyword">const</span> res = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">'https://api.openai.com/v1/chat/completions'</span>, {</span>
+<span class="code-line">    <span class="code-property">method</span>: <span class="code-string">'POST'</span>,</span>
+<span class="code-line">    <span class="code-property">headers</span>: {</span>
+<span class="code-line">      <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span>,</span>
+<span class="code-line">      <span class="code-string">'Authorization'</span>: <span class="code-string">`Bearer ${key}`</span>,</span>
+<span class="code-line">    },</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This function's whole job: send a conversation to OpenAI and get a reply.</p>
+              <p class="tl">Look for a key saved earlier in this browser.</p>
+              <p class="tl">No key? Stop immediately — don't even try the call.</p>
+              <p class="tl">Otherwise, send a request straight to OpenAI's servers...</p>
+              <p class="tl">...as a POST, meaning "here's data," not "give me a page."</p>
+              <p class="tl">Say the data is JSON...</p>
+              <p class="tl">...and prove who's asking by attaching the key.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Trace the decision</h2>
+        <p>Every AI-assisted button follows the same fork. Step through it.</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-4-1","label":"Parent taps Suggest a Reward"},
+          {"highlight":"flow-actor-4-2","label":"Is a key saved, and does the call succeed?","packet":true,"from":"actor-4-1","to":"actor-4-2"},
+          {"highlight":"flow-actor-4-3","label":"Yes: fetch() asks OpenAI directly, from the browser","packet":true,"from":"actor-4-2","to":"actor-4-3"},
+          {"highlight":"flow-actor-4-4","label":"No key, network error, or rate limit: run the built-in rule-based logic instead","packet":true,"from":"actor-4-2","to":"actor-4-4"},
+          {"highlight":"flow-actor-4-5","label":"Either path lands on the exact same result shape — the screen never knows which one ran","packet":true,"from":"actor-4-3","to":"actor-4-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-4-1"><div class="flow-actor-icon">👆</div><span>Tap</span></div>
+            <div class="flow-actor" id="flow-actor-4-2"><div class="flow-actor-icon">❓</div><span>Key ok?</span></div>
+            <div class="flow-actor" id="flow-actor-4-3"><div class="flow-actor-icon">🤖</div><span>OpenAI</span></div>
+            <div class="flow-actor" id="flow-actor-4-4"><div class="flow-actor-icon">📐</div><span>Fallback logic</span></div>
+            <div class="flow-actor" id="flow-actor-4-5"><div class="flow-actor-icon">🖼️</div><span>Same result</span></div>
+          </div>
+          <div class="flow-packet" id="flow-packet-4"></div>
+          <div class="flow-step-label" id="flow-label-4">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The AI doesn't get to invent a reward</h2>
+        <p>The instructions sent to OpenAI don't just ask for a suggestion — they force it to pick from the parent's own list. Look closely at the very first sentence of the instructions below.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — ai.js</span>
+            <pre><code><span class="code-line">{ <span class="code-property">role</span>: <span class="code-string">'system'</span>, <span class="code-property">content</span>: <span class="code-string">'You recommend a reward for a child from a</span></span>
+<span class="code-line"><span class="code-string">  PARENT-APPROVED list only. You must pick the "id" of exactly</span></span>
+<span class="code-line"><span class="code-string">  one item from the provided catalog — never invent a new reward,</span></span>
+<span class="code-line"><span class="code-string">  amount, or category. Reply with ONLY JSON: {"rewardId": "...",</span></span>
+<span class="code-line"><span class="code-string">  "reason": "...", "suggestedFrequency": "..."}.'</span> },</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This is a
+                <span class="term" data-definition="A system prompt is a hidden instruction sent before the user's actual message that sets the AI's rules and role for the whole conversation — the user never sees it.">system prompt</span>
+                — the AI's rulebook for this one task.
+              </p>
+              <p class="tl">The very first sentence is a hard boundary: only rewards the parent already added.</p>
+              <p class="tl">Spelled out again, explicitly, so there's no ambiguity: no inventing anything.</p>
+              <p class="tl">And it must answer in a strict, predictable data format the code can trust.</p>
+            </div>
+          </div>
+        </div>
+        <p>Even if the answer comes back malformed, the code double-checks: <code>const match = active.find(r =&gt; r.id === parsed.rewardId); if (!match) throw new Error(...)</code> — an AI reply that names a reward that doesn't exist gets rejected and falls through to the same rule-based fallback as a network error.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right. Because there's no backend to route through, the browser calls OpenAI directly — meaning something has to hold the key. Storing it only in that one browser's localStorage, never in a file the app ships, keeps it off the public repo entirely."
+               data-explanation-wrong="Think about it from the other direction: this app has no backend server. If the key isn't on a server and isn't in the repo, where's the only place left for it to live?">
+            <h3 class="quiz-question">Why does ChildTaskTracker ask each parent to paste in their own OpenAI key, instead of shipping one key with the app?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>OpenAI requires a different key per user by law</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>A key shipped in the code would be sitting in the public GitHub repo for anyone to copy and spend on their own bill</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It makes the AI responses more accurate</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">The Clever Tricks</h1>
+      <p class="module-subtitle">Two small pieces of logic that make a 24-hour wait and a forgiving streak both testable in seconds.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The problem with "wait 24 hours"</h2>
+        <p>If a parent doesn't approve a task, it should auto-approve after a day — so a busy evening never costs a kid their streak. But how do you <em>test</em> that without actually waiting a full day, every single time?</p>
+        <p>The trick: the app never asks the real computer clock what time it is. It keeps its own pretend clock in <code>STATE</code>, and a button in Settings can fast-forward it — like a remote control for time itself.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Fast-forwarding a day</h2>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">advanceOneDay</span>() {</span>
+<span class="code-line">  STATE.clock.simulatedNowMs += <span class="code-number">86400000</span>;</span>
+<span class="code-line">  STATE.clock.simulatedDate = <span class="code-function">isoDate</span>(<span class="code-keyword">new</span> <span class="code-function">Date</span>(STATE.clock.simulatedNowMs));</span>
+<span class="code-line">  <span class="code-function">checkAutoApprovals</span>();</span>
+<span class="code-line">  <span class="code-function">saveState</span>();</span>
+<span class="code-line">  <span class="code-function">showToast</span>(<span class="code-string">'⏩ A new day has begun!'</span>);</span>
+<span class="code-line">  <span class="code-function">render</span>();</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Add exactly one day's worth of milliseconds — 86,400,000 of them — to the pretend clock.</p>
+              <p class="tl">Update the human-readable date to match.</p>
+              <p class="tl">Immediately check: does anything need to auto-approve now that a day has "passed"?</p>
+              <p class="tl">Save, celebrate with a toast, and redraw the screen.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Good to know</strong>
+            <p>Every timestamp in the app — when a task was marked done, when a redemption was requested — is measured against this pretend clock, not the real one. That's what makes the whole demo deterministic and repeatable.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The check that actually approves things</h2>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">checkAutoApprovals</span>() {</span>
+<span class="code-line">  <span class="code-keyword">let</span> changed = <span class="code-keyword">false</span>;</span>
+<span class="code-line">  STATE.completions.<span class="code-function">filter</span>(c => c.status === <span class="code-string">'pending'</span>).<span class="code-function">forEach</span>(c => {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (<span class="code-function">nowMs</span>() - c.markedAtMs >= <span class="code-number">86400000</span>) { <span class="code-function">approveCompletion</span>(c.id, <span class="code-string">'auto'</span>); changed = <span class="code-keyword">true</span>; }</span>
+<span class="code-line">  });</span>
+<span class="code-line">  <span class="code-keyword">if</span> (changed) <span class="code-function">saveState</span>();</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Look at every task still waiting on a parent.</p>
+              <p class="tl">For each one: has a full day passed since it was marked done?</p>
+              <p class="tl">If yes, approve it automatically and remember that something changed.</p>
+              <p class="tl">Only bother saving if anything actually got auto-approved.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A streak survives one bad day</h2>
+        <p>Miss a single day and a real streak shouldn't just vanish — that's punishing, and it's how habit apps lose people. This one forgives exactly <strong>one</strong> missed day before it resets, like a library that waives your fee once but not twice.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">let</span> streak = <span class="code-number">0</span>, forgiven = <span class="code-keyword">false</span>, cursor = <span class="code-function">addDays</span>(<span class="code-function">todayStr</span>(), -<span class="code-number">1</span>), guard = <span class="code-number">0</span>;</span>
+<span class="code-line"><span class="code-keyword">while</span> (guard++ &lt; <span class="code-number">90</span>) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> due = <span class="code-function">tasksForChild</span>(childId).<span class="code-function">filter</span>(t => <span class="code-function">isTaskDueOn</span>(t, cursor));</span>
+<span class="code-line">  <span class="code-keyword">if</span> (due.length > <span class="code-number">0</span>) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> allDone = due.<span class="code-function">every</span>(t => {</span>
+<span class="code-line">      <span class="code-keyword">const</span> c = <span class="code-function">findCompletion</span>(t.id, cursor);</span>
+<span class="code-line">      <span class="code-keyword">return</span> c && (c.status === <span class="code-string">'approved'</span> || c.status === <span class="code-string">'auto_approved'</span>);</span>
+<span class="code-line">    });</span>
+<span class="code-line">    <span class="code-keyword">if</span> (allDone) streak++;</span>
+<span class="code-line">    <span class="code-keyword">else if</span> (!forgiven) forgiven = <span class="code-keyword">true</span>;</span>
+<span class="code-line">    <span class="code-keyword">else</span> <span class="code-keyword">break</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  cursor = <span class="code-function">addDays</span>(cursor, -<span class="code-number">1</span>);</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start counting from yesterday, with no forgiveness spent yet.</p>
+              <p class="tl">Walk backward day by day, up to 90 days, so this can never run forever.</p>
+              <p class="tl">Only count a day if the kid actually had tasks due on it.</p>
+              <p class="tl">Were every one of those tasks approved?</p>
+              <p class="tl">If yes: the streak grows by one.</p>
+              <p class="tl">If no, and forgiveness hasn't been used yet: spend it, and keep going.</p>
+              <p class="tl">If no, and forgiveness is already spent: stop counting — the streak ends here.</p>
+              <p class="tl">Step one more day into the past and repeat.</p>
+            </div>
+          </div>
+        </div>
+        <p>A
+          <span class="term" data-definition="A loop is code that repeats the same steps over and over, usually until some condition is met — here, until it finds two bad days in a row or hits the 90-day safety limit.">loop</span>
+          walking backward through the calendar, one <code>forgiven</code> flag, one <code>break</code>. That's the entire streak-forgiveness feature.
+        </p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Right. forgiven starts false. Day 1 missed sets it to true and keeps counting. Day 2 missed hits the else branch — forgiven is already true, so it breaks immediately. The streak resets because two misses in a row use up the one grace day and then end the count."
+               data-explanation-wrong="Walk through the code again: what does the else-if branch do the FIRST time a day is missed, versus what the plain else branch does the SECOND time?">
+            <h3 class="quiz-question">A kid has a 5-day streak, then misses two days in a row. Based on the code above, what happens to their streak?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It stays at 5 — both misses get forgiven</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It grows to 7 — missed days don't count against it at all</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It resets to 0 — the first miss is forgiven, but the second miss breaks the loop</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-6" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">When It Broke</h1>
+      <p class="module-subtitle">Two real bugs from this exact app, and the debugging instinct each one teaches.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">This actually happened</h2>
+        <p>Everything you're about to see is a real bug that shipped to the live app before it was caught — not a made-up example. Debugging intuition comes from real breakage, so here it is.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Spot the bug</h2>
+        <p>This is (almost) the real code for every popup in the app. Every button inside it — Save, Send, Cancel — stopped working the moment this line shipped. Click the line you think is responsible.</p>
+        <div class="bug-challenge">
+          <h3>Find the bug:</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)"><span class="line-num">1</span><code>function modalConfirmRedeem(reward) {</code></div>
+            <div class="bug-line bug-target" data-line="2" onclick="checkBugLine(this, true)"><span class="line-num">2</span><code>  return `&lt;div class="modal" onclick="event.stopPropagation()"&gt;</code></div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)"><span class="line-num">3</span><code>    &lt;h3&gt;Redeem ${reward.title}?&lt;/h3&gt;</code></div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)"><span class="line-num">4</span><code>    &lt;button data-action="confirm-redeem" data-reward="${reward.id}"&gt;Send request&lt;/button&gt;</code></div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)"><span class="line-num">5</span><code>  &lt;/div&gt;`;</code></div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)"><span class="line-num">6</span><code>}</code></div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Why this one line broke everything</h2>
+        <p>Remember Module 1's event delegation — one listener on <code>document</code> catches every click in the app by letting it "bubble" up from wherever you clicked. The line
+          <code>onclick="event.stopPropagation()"</code>
+          does exactly what it says: it stops that bubble from ever reaching <code>document</code>.
+        </p>
+        <p>The button's click still fired. It just never got heard.</p>
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Common mistake</strong>
+            <p>The line looked defensive, not dangerous — a common instinct is "stop this click from closing the popup underneath it." But event delegation means <em>every</em> button's job depends on that same click reaching <code>document</code>. Stopping it anywhere stops it for everything nested inside.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A second bug: the router that wasn't broken</h2>
+        <div class="quiz-container" id="quiz-scenario-router">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario</span>
+              <p>An automated testing tool changed the page's address to a new screen. The screen never updated — it looked exactly like Module 3's router was broken. But real users clicking real links saw it work perfectly every time. What's actually going on?</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-a"
+                 data-explanation-right="Exactly — the app changes location.hash directly, which fires a real hashchange event, but the testing tool used a different navigation method that skips it. The lesson: always verify with the same interaction path a real user takes, not just a URL change."
+                 data-explanation-wrong="Not quite — think about what specifically triggers this app's router to re-run, and whether every way of changing a web address triggers it.">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The router only listens for a real hashchange event — some automated tools change the address a different way that never fires it, while a genuine link click always does</span></button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The router is broken for everyone, and real users just didn't notice</span></button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The internet connection was too slow</span></button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-scenario-router')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-scenario-router')">Try Again</button>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What both bugs teach</h2>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)"><div class="pattern-icon" style="background: var(--color-actor-1)">🖱️</div><h4 class="pattern-title">Click-test, don't just read</h4><p class="pattern-desc">The stopPropagation bug was invisible in the code review — it only showed up the moment someone actually clicked "Save."</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)"><div class="pattern-icon" style="background: var(--color-actor-2)">🧭</div><h4 class="pattern-title">Match the real path</h4><p class="pattern-desc">Testing tools can take shortcuts real users never take. If a bug only shows up in one specific tool, suspect the tool before the app.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)"><div class="pattern-icon" style="background: var(--color-actor-3)">📡</div><h4 class="pattern-title">Caches hide your fixes</h4><p class="pattern-desc">A CDN can keep serving an old file for minutes after you've pushed a real fix — confirm with the actual bytes, not just "I pushed it."</p></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right instinct. Since the app uses event delegation, the first suspect for 'button does nothing, no errors' is something between the button and document blocking the click — most often a stopPropagation() on an element in between."
+               data-explanation-wrong="Think about how clicks reach the code that handles them in this app — what's the one thing that could silently stop a click before it's ever seen?">
+            <h3 class="quiz-question">You add a brand-new modal. Its "Save" button does nothing when clicked, and the console shows no errors at all. Based on this module, what's your first suspect?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The button's text is misspelled</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Something between the button and document is calling stopPropagation(), so the delegated click handler never sees it</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The internet is down</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

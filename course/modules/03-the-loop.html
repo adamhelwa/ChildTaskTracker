@@ -1,0 +1,136 @@
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">The Loop</h1>
+      <p class="module-subtitle">Every single interaction in this app follows the exact same five-step loop.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Trace it yourself</h2>
+        <p>Click through the steps below. This is <em>the</em> loop — the same five steps run whether you're marking a task, approving it, redeeming a reward, or renaming a child.</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"You tap the check button"},
+          {"highlight":"flow-actor-2","label":"markTaskDone() runs — the only code allowed to touch this data","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"STATE is updated in memory — right now, this is the only copy that exists","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"saveState() writes the whole thing to localStorage, so it survives closing the tab","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"render() rebuilds the entire screen from STATE, from scratch","packet":true,"from":"actor-3","to":"actor-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1"><div class="flow-actor-icon">👆</div><span>UI event</span></div>
+            <div class="flow-actor" id="flow-actor-2"><div class="flow-actor-icon">✏️</div><span>Mutation fn</span></div>
+            <div class="flow-actor" id="flow-actor-3"><div class="flow-actor-icon">🧠</div><span>STATE</span></div>
+            <div class="flow-actor" id="flow-actor-4"><div class="flow-actor-icon">💾</div><span>localStorage</span></div>
+            <div class="flow-actor" id="flow-actor-5"><div class="flow-actor-icon">🖼️</div><span>Screen</span></div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One router decides what you see</h2>
+        <p>A single function reads the web address (everything after the <code>#</code>) and decides which screen to build. Change the address, and this function picks a different path.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">render</span>() {</span>
+<span class="code-line">  checkAutoApprovals();</span>
+<span class="code-line">  <span class="code-keyword">const</span> parts = parseRoute();</span>
+<span class="code-line">  <span class="code-keyword">const</span> app = document.<span class="code-function">getElementById</span>(<span class="code-string">'app'</span>);</span>
+<span class="code-line">  <span class="code-keyword">let</span> html;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (parts[0] === <span class="code-string">'child'</span> && parts[1]) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> child = <span class="code-function">getChild</span>(parts[1]);</span>
+<span class="code-line">    <span class="code-comment">// ...decide which of the child's three tabs to build</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">First, quietly check if any pending tasks have waited 24 hours and should auto-approve.</p>
+              <p class="tl">Break the web address into pieces, like splitting "child/emma/tasks" into a list.</p>
+              <p class="tl">Grab the one spot on the page everything gets drawn into.</p>
+              <p class="tl">We haven't decided what to draw yet.</p>
+              <p class="tl">If the address starts with "child" and names one...</p>
+              <p class="tl">...look up that specific child...</p>
+              <p class="tl">...and figure out which of their three tabs to show.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The whiteboard, wiped and redrawn</h2>
+        <p><code>render()</code> doesn't figure out what changed and tweak just that piece. It throws away the <em>entire</em> screen and rebuilds it from <code>STATE</code>, every single time — like a whiteboard that gets wiped clean and redrawn from memory after every edit, rather than erasing just one word.</p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key insight</strong>
+            <p>Frameworks like React exist specifically to avoid this — they compare old and new versions and only touch what changed, called
+              <span class="term" data-definition="Diffing means comparing the old version of something to the new version and only updating the parts that actually changed — instead of throwing everything away and starting over.">diffing</span>.
+              This app skips that entirely: no framework, no build step, just a template rebuilt from scratch. Slower in theory, invisible in practice at this scale, and radically simpler to reason about.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The notebook that survives closing the tab</h2>
+        <p>Browsers give every website a small private notebook called
+          <span class="term" data-definition="localStorage is a small storage space every website gets in your browser. Data saved there sticks around even after you close the tab or restart your computer — until you or the site clears it.">localStorage</span>.
+          Close the two functions that are the app's only connection to it:</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">loadState</span>() {</span>
+<span class="code-line">  <span class="code-keyword">try</span> {</span>
+<span class="code-line">    <span class="code-keyword">const</span> raw = localStorage.<span class="code-function">getItem</span>(STORAGE_KEY);</span>
+<span class="code-line">    <span class="code-keyword">return</span> raw ? JSON.<span class="code-function">parse</span>(raw) : <span class="code-keyword">null</span>;</span>
+<span class="code-line">  } <span class="code-keyword">catch</span> { <span class="code-keyword">return</span> <span class="code-keyword">null</span>; }</span>
+<span class="code-line">}</span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">saveState</span>() {</span>
+<span class="code-line">  <span class="code-keyword">try</span> { localStorage.<span class="code-function">setItem</span>(STORAGE_KEY, JSON.<span class="code-function">stringify</span>(STATE)); } <span class="code-keyword">catch</span> {}</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">On startup, try to read whatever was saved before.</p>
+              <p class="tl">Turn the saved text back into a real JavaScript object — localStorage can only hold text.</p>
+              <p class="tl">If nothing's saved yet, say so honestly instead of crashing.</p>
+              <p class="tl">Every time STATE changes...</p>
+              <p class="tl">...turn the whole thing into text and save it — quietly failing instead of crashing if storage is full or blocked.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. localStorage is scoped per browser — a parent's phone and a child's tablet each have their own separate notebook. To sync them, something would need to live outside any single browser and both devices would talk to it: a real backend."
+               data-explanation-wrong="Not quite — think about where STATE actually lives right now, and whether two different devices could ever see the same localStorage.">
+            <h3 class="quiz-question">A parent wants their phone and their kid's tablet to show the exact same live data. Based on where STATE lives today, what's missing?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Nothing — localStorage already syncs across devices automatically</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>A faster render() function</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Some shared server both devices talk to — localStorage never leaves the one browser it's saved in</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

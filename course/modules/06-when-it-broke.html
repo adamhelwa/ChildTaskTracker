@@ -1,0 +1,105 @@
+<section class="module" id="module-6" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">When It Broke</h1>
+      <p class="module-subtitle">Two real bugs from this exact app, and the debugging instinct each one teaches.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">This actually happened</h2>
+        <p>Everything you're about to see is a real bug that shipped to the live app before it was caught — not a made-up example. Debugging intuition comes from real breakage, so here it is.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Spot the bug</h2>
+        <p>This is (almost) the real code for every popup in the app. Every button inside it — Save, Send, Cancel — stopped working the moment this line shipped. Click the line you think is responsible.</p>
+        <div class="bug-challenge">
+          <h3>Find the bug:</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)"><span class="line-num">1</span><code>function modalConfirmRedeem(reward) {</code></div>
+            <div class="bug-line bug-target" data-line="2" onclick="checkBugLine(this, true)"><span class="line-num">2</span><code>  return `&lt;div class="modal" onclick="event.stopPropagation()"&gt;</code></div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)"><span class="line-num">3</span><code>    &lt;h3&gt;Redeem ${reward.title}?&lt;/h3&gt;</code></div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)"><span class="line-num">4</span><code>    &lt;button data-action="confirm-redeem" data-reward="${reward.id}"&gt;Send request&lt;/button&gt;</code></div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)"><span class="line-num">5</span><code>  &lt;/div&gt;`;</code></div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)"><span class="line-num">6</span><code>}</code></div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Why this one line broke everything</h2>
+        <p>Remember Module 1's event delegation — one listener on <code>document</code> catches every click in the app by letting it "bubble" up from wherever you clicked. The line
+          <code>onclick="event.stopPropagation()"</code>
+          does exactly what it says: it stops that bubble from ever reaching <code>document</code>.
+        </p>
+        <p>The button's click still fired. It just never got heard.</p>
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Common mistake</strong>
+            <p>The line looked defensive, not dangerous — a common instinct is "stop this click from closing the popup underneath it." But event delegation means <em>every</em> button's job depends on that same click reaching <code>document</code>. Stopping it anywhere stops it for everything nested inside.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A second bug: the router that wasn't broken</h2>
+        <div class="quiz-container" id="quiz-scenario-router">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario</span>
+              <p>An automated testing tool changed the page's address to a new screen. The screen never updated — it looked exactly like Module 3's router was broken. But real users clicking real links saw it work perfectly every time. What's actually going on?</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-a"
+                 data-explanation-right="Exactly — the app changes location.hash directly, which fires a real hashchange event, but the testing tool used a different navigation method that skips it. The lesson: always verify with the same interaction path a real user takes, not just a URL change."
+                 data-explanation-wrong="Not quite — think about what specifically triggers this app's router to re-run, and whether every way of changing a web address triggers it.">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The router only listens for a real hashchange event — some automated tools change the address a different way that never fires it, while a genuine link click always does</span></button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The router is broken for everyone, and real users just didn't notice</span></button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The internet connection was too slow</span></button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-scenario-router')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-scenario-router')">Try Again</button>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What both bugs teach</h2>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)"><div class="pattern-icon" style="background: var(--color-actor-1)">🖱️</div><h4 class="pattern-title">Click-test, don't just read</h4><p class="pattern-desc">The stopPropagation bug was invisible in the code review — it only showed up the moment someone actually clicked "Save."</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)"><div class="pattern-icon" style="background: var(--color-actor-2)">🧭</div><h4 class="pattern-title">Match the real path</h4><p class="pattern-desc">Testing tools can take shortcuts real users never take. If a bug only shows up in one specific tool, suspect the tool before the app.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)"><div class="pattern-icon" style="background: var(--color-actor-3)">📡</div><h4 class="pattern-title">Caches hide your fixes</h4><p class="pattern-desc">A CDN can keep serving an old file for minutes after you've pushed a real fix — confirm with the actual bytes, not just "I pushed it."</p></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right instinct. Since the app uses event delegation, the first suspect for 'button does nothing, no errors' is something between the button and document blocking the click — most often a stopPropagation() on an element in between."
+               data-explanation-wrong="Think about how clicks reach the code that handles them in this app — what's the one thing that could silently stop a click before it's ever seen?">
+            <h3 class="quiz-question">You add a brand-new modal. Its "Save" button does nothing when clicked, and the console shows no errors at all. Based on this module, what's your first suspect?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The button's text is misspelled</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Something between the button and document is calling stopPropagation(), so the delegated click handler never sees it</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>The internet is down</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

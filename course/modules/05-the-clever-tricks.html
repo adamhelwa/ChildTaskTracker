@@ -1,0 +1,138 @@
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">The Clever Tricks</h1>
+      <p class="module-subtitle">Two small pieces of logic that make a 24-hour wait and a forgiving streak both testable in seconds.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The problem with "wait 24 hours"</h2>
+        <p>If a parent doesn't approve a task, it should auto-approve after a day — so a busy evening never costs a kid their streak. But how do you <em>test</em> that without actually waiting a full day, every single time?</p>
+        <p>The trick: the app never asks the real computer clock what time it is. It keeps its own pretend clock in <code>STATE</code>, and a button in Settings can fast-forward it — like a remote control for time itself.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Fast-forwarding a day</h2>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">advanceOneDay</span>() {</span>
+<span class="code-line">  STATE.clock.simulatedNowMs += <span class="code-number">86400000</span>;</span>
+<span class="code-line">  STATE.clock.simulatedDate = <span class="code-function">isoDate</span>(<span class="code-keyword">new</span> <span class="code-function">Date</span>(STATE.clock.simulatedNowMs));</span>
+<span class="code-line">  <span class="code-function">checkAutoApprovals</span>();</span>
+<span class="code-line">  <span class="code-function">saveState</span>();</span>
+<span class="code-line">  <span class="code-function">showToast</span>(<span class="code-string">'⏩ A new day has begun!'</span>);</span>
+<span class="code-line">  <span class="code-function">render</span>();</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Add exactly one day's worth of milliseconds — 86,400,000 of them — to the pretend clock.</p>
+              <p class="tl">Update the human-readable date to match.</p>
+              <p class="tl">Immediately check: does anything need to auto-approve now that a day has "passed"?</p>
+              <p class="tl">Save, celebrate with a toast, and redraw the screen.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Good to know</strong>
+            <p>Every timestamp in the app — when a task was marked done, when a redemption was requested — is measured against this pretend clock, not the real one. That's what makes the whole demo deterministic and repeatable.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The check that actually approves things</h2>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">checkAutoApprovals</span>() {</span>
+<span class="code-line">  <span class="code-keyword">let</span> changed = <span class="code-keyword">false</span>;</span>
+<span class="code-line">  STATE.completions.<span class="code-function">filter</span>(c => c.status === <span class="code-string">'pending'</span>).<span class="code-function">forEach</span>(c => {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (<span class="code-function">nowMs</span>() - c.markedAtMs >= <span class="code-number">86400000</span>) { <span class="code-function">approveCompletion</span>(c.id, <span class="code-string">'auto'</span>); changed = <span class="code-keyword">true</span>; }</span>
+<span class="code-line">  });</span>
+<span class="code-line">  <span class="code-keyword">if</span> (changed) <span class="code-function">saveState</span>();</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Look at every task still waiting on a parent.</p>
+              <p class="tl">For each one: has a full day passed since it was marked done?</p>
+              <p class="tl">If yes, approve it automatically and remember that something changed.</p>
+              <p class="tl">Only bother saving if anything actually got auto-approved.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A streak survives one bad day</h2>
+        <p>Miss a single day and a real streak shouldn't just vanish — that's punishing, and it's how habit apps lose people. This one forgives exactly <strong>one</strong> missed day before it resets, like a library that waives your fee once but not twice.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">let</span> streak = <span class="code-number">0</span>, forgiven = <span class="code-keyword">false</span>, cursor = <span class="code-function">addDays</span>(<span class="code-function">todayStr</span>(), -<span class="code-number">1</span>), guard = <span class="code-number">0</span>;</span>
+<span class="code-line"><span class="code-keyword">while</span> (guard++ &lt; <span class="code-number">90</span>) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> due = <span class="code-function">tasksForChild</span>(childId).<span class="code-function">filter</span>(t => <span class="code-function">isTaskDueOn</span>(t, cursor));</span>
+<span class="code-line">  <span class="code-keyword">if</span> (due.length > <span class="code-number">0</span>) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> allDone = due.<span class="code-function">every</span>(t => {</span>
+<span class="code-line">      <span class="code-keyword">const</span> c = <span class="code-function">findCompletion</span>(t.id, cursor);</span>
+<span class="code-line">      <span class="code-keyword">return</span> c && (c.status === <span class="code-string">'approved'</span> || c.status === <span class="code-string">'auto_approved'</span>);</span>
+<span class="code-line">    });</span>
+<span class="code-line">    <span class="code-keyword">if</span> (allDone) streak++;</span>
+<span class="code-line">    <span class="code-keyword">else if</span> (!forgiven) forgiven = <span class="code-keyword">true</span>;</span>
+<span class="code-line">    <span class="code-keyword">else</span> <span class="code-keyword">break</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  cursor = <span class="code-function">addDays</span>(cursor, -<span class="code-number">1</span>);</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start counting from yesterday, with no forgiveness spent yet.</p>
+              <p class="tl">Walk backward day by day, up to 90 days, so this can never run forever.</p>
+              <p class="tl">Only count a day if the kid actually had tasks due on it.</p>
+              <p class="tl">Were every one of those tasks approved?</p>
+              <p class="tl">If yes: the streak grows by one.</p>
+              <p class="tl">If no, and forgiveness hasn't been used yet: spend it, and keep going.</p>
+              <p class="tl">If no, and forgiveness is already spent: stop counting — the streak ends here.</p>
+              <p class="tl">Step one more day into the past and repeat.</p>
+            </div>
+          </div>
+        </div>
+        <p>A
+          <span class="term" data-definition="A loop is code that repeats the same steps over and over, usually until some condition is met — here, until it finds two bad days in a row or hits the 90-day safety limit.">loop</span>
+          walking backward through the calendar, one <code>forgiven</code> flag, one <code>break</code>. That's the entire streak-forgiveness feature.
+        </p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Right. forgiven starts false. Day 1 missed sets it to true and keeps counting. Day 2 missed hits the else branch — forgiven is already true, so it breaks immediately. The streak resets because two misses in a row use up the one grace day and then end the count."
+               data-explanation-wrong="Walk through the code again: what does the else-if branch do the FIRST time a day is missed, versus what the plain else branch does the SECOND time?">
+            <h3 class="quiz-question">A kid has a 5-day streak, then misses two days in a row. Based on the code above, what happens to their streak?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It stays at 5 — both misses get forgiven</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It grows to 7 — missed days don't count against it at all</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>It resets to 0 — the first miss is forgiven, but the second miss breaks the loop</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

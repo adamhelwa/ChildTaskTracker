@@ -1,0 +1,109 @@
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Cast</h1>
+      <p class="module-subtitle">Four files play four very different roles — like the crew behind a small play.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Four files, four jobs</h2>
+        <p>Think of the app like a small play. One file is the stage. One is the costumes. One is the cast and script, doing all the acting. One is a guest consultant who only shows up when specifically called.</p>
+        <div class="file-tree">
+          <div class="ft-file"><span class="ft-name">index.html</span><span class="ft-desc">The stage — an empty shell the other files fill in</span></div>
+          <div class="ft-file"><span class="ft-name">styles.css</span><span class="ft-desc">The costumes and set design — every color, shape, spacing rule</span></div>
+          <div class="ft-file"><span class="ft-name">app.js</span><span class="ft-desc">The cast and script — state, rendering, every button's behavior</span></div>
+          <div class="ft-file"><span class="ft-name">ai.js</span><span class="ft-desc">A guest consultant — called in only for AI suggestions, with a stand-in ready if they don't show</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The script everyone reads from</h2>
+        <p>Nearly every actor in <code>app.js</code> reads from and writes to one shared object called <code>STATE</code>. It's the single source of truth — every child, task, and point balance lives here, and nowhere else.</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)"><div class="pattern-icon" style="background: var(--color-actor-1)">🧒</div><h4 class="pattern-title">children</h4><p class="pattern-desc">Name, age, avatar, current points — one entry per kid.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)"><div class="pattern-icon" style="background: var(--color-actor-2)">✅</div><h4 class="pattern-title">tasks &amp; completions</h4><p class="pattern-desc">What's assigned, and every time it was marked done, approved, or rejected.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)"><div class="pattern-icon" style="background: var(--color-actor-3)">🎁</div><h4 class="pattern-title">rewards &amp; redemptions</h4><p class="pattern-desc">The prize catalog, and every request to cash points in.</p></div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)"><div class="pattern-icon" style="background: var(--color-actor-4)">📒</div><h4 class="pattern-title">pointsLedger &amp; notifications</h4><p class="pattern-desc">Every point earned or spent, and every alert sent to a parent.</p></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where STATE actually starts</h2>
+        <p>The very first lines of the app build this object. Nothing fancy — just a plain JavaScript object with empty lists waiting to be filled in.</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — app.js</span>
+            <pre><code><span class="code-line"><span class="code-keyword">const</span> state = {</span>
+<span class="code-line">  clock: { simulatedNowMs: now, simulatedDate: today },</span>
+<span class="code-line">  parentNames: { A: <span class="code-string">'Parent A'</span>, B: <span class="code-string">'Parent B'</span> },</span>
+<span class="code-line">  children: [], tasks: [], completions: [], rewards: [], redemptions: [], pointsLedger: [], notifications: [],</span>
+<span class="code-line">};</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start building the app's one and only object.</p>
+              <p class="tl">Remember what "today" is — more on this trick in Module 5.</p>
+              <p class="tl">Give each parent a default display name, which Settings can change later.</p>
+              <p class="tl">Seven empty lists, each one ready to hold a different kind of record.</p>
+            </div>
+          </div>
+        </div>
+        <p>Every list here is a
+          <span class="term" data-definition="An array is an ordered list of items in code — like a numbered list, but the computer can add, remove, search, and loop through it instantly.">array</span>
+          — an ordered list the app can search, filter, and add to.
+        </p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Who's allowed to change the script</h2>
+        <p>Reading <code>STATE</code> happens everywhere, but <em>changing</em> it only happens through a small set of named functions — never by reaching in and editing it directly from just anywhere.</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">✏️</div>
+            <div><strong>Mutation functions</strong><p><code>markTaskDone()</code>, <code>approveCompletion()</code>, <code>addLedger()</code> — the only code allowed to change <code>STATE</code>.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🖼️</div>
+            <div><strong>render()</strong><p>Reads <code>STATE</code> and rebuilds the on-screen HTML — never changes anything itself.</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">💾</div>
+            <div><strong>saveState() / loadState()</strong><p>The only two functions that touch the browser's long-term storage.</p></div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Good to know</strong>
+            <p>Keeping "things that change data" and "things that display data" separate is a core software idea. It means you always know exactly where to look when something's wrong: is the <em>data</em> wrong, or is the <em>display</em> of it wrong?</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: apply it</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Right — a parent's points don't move until addLedger() runs, and addLedger() is only ever called from approveCompletion() and approveRedemption(). If points aren't updating, that's exactly where to look first."
+               data-explanation-wrong="Not quite. Remember: only mutation functions are allowed to change STATE. Which one is responsible for adding points?">
+            <h3 class="quiz-question">A parent approves a task, but the child's points don't go up. Which function would you check first?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>addLedger() — the only function that changes a child's points balance</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>renderChildTasks() — it displays the task list</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>styles.css — it controls what the points number looks like</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
