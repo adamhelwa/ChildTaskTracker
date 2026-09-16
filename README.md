@@ -35,4 +35,5 @@ Reward recommendations, weekly KPI summaries, and starter-task suggestions can c
 | `index.html`, `styles.css`, `app.js`, `ai.js` | The MVP front-end demo (Option B: Warm & Playful) |
 | `ChildTaskTracker_PRD.pdf` | Product requirements document |
 | `ChildTaskTracker_Roadmap.pdf` / `.html` | Phased product roadmap |
+| `ARCHITECTURE.html` | System architecture &amp; data-flow diagrams, with tradeoffs and risk management |
 | `landing-concepts/` | Three landing page design explorations (Calm, Playful, Animated) |
